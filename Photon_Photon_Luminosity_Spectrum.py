@@ -71,8 +71,8 @@ def S_gamma_gamma(W, s_ep, Q2_max_e=100, Q2_max_p=10):
     return 2 * W / s_ep * luminosity
 
 # Parameters for photon virtualities
-Q2_max_e = 100  # Maximal photon virtuality for electron (GeV^2)
-Q2_max_p = 10   # Maximal photon virtuality for proton (GeV^2)
+Q2_max_e = 100000  # Maximal photon virtuality for electron (GeV^2)
+Q2_max_p = 100000   # Maximal photon virtuality for proton (GeV^2)
 
 # Generate and plot the elastic photon-photon luminosity spectrum
 W_values = np.linspace(10, 1000, 100)  # Photon-photon CM energy in GeV
