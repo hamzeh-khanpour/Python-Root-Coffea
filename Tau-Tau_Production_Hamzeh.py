@@ -17,12 +17,15 @@ q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2 (matching your se
 def G_E(Q2):
     return (1 + Q2 / 0.71) ** (-4)
 
+
 def G_M(Q2):
     return 7.78 * G_E(Q2)
+
 
 # Minimum Photon Virtuality
 def qmin2(mass, y):
     return mass * mass * y * y / (1 - y)
+
 
 # Elastic Photon Flux from Electron
 def flux_y_electron(ye, qmax2):
@@ -34,6 +37,7 @@ def flux_y_electron(ye, qmax2):
     flux1 = y1 * math.log(qmax2 / qmin2v)
     flux2 = y2 * (1.0 - qmin2v / qmax2)
     return ALPHA2PI * (flux1 - flux2)
+
 
 # Elastic Photon Flux from Proton
 def flux_y_proton(yp, qmax2):
@@ -117,16 +121,15 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, qmax2e, qmax2p):
         result = 0.0
     return result
 
+
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
-W_values = np.logspace(1.0, 3.0, 404)  # Range of W values from 10 GeV to 1000 GeV 
-
+W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV 
 
 
 # Calculate the Elastic Photon-Photon Luminosity Spectrum
 luminosity_values = [flux_el_yy_atW(W, eEbeam, pEbeam, q2emax, q2pmax) for W in W_values]
-
 
 
 # Calculate Integrated Tau-Tau Production Cross-Section at W_0 = 10 GeV
@@ -179,4 +182,5 @@ plt.legend(fontsize=14)
 plt.savefig("integrated_tau_tau_cross_section.pdf")
 
 plt.show()
+
 
