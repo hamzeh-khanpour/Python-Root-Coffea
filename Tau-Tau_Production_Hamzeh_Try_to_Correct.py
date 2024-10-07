@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4   # Electron mass
 pmass = 0.938272081    # Proton mass
-
+mtau = 1.77686  # Tau mass in GeV
 q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
 q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2 (matching your settings)
 
@@ -24,6 +24,13 @@ def G_M(Q2):
 def qmin2(mass, y):
     return mass * mass * y * y / (1 - y)
 
+# Corrected Photon-Photon Center-of-Mass Energy Calculation
+def corrected_w_squared(e1, e2, theta, q1_squared, q2_squared):
+    return 2 * e1 * e2 * (1 - math.cos(theta)) - q1_squared - q2_squared
+
+# Suppression Factor for Large Photon Virtuality
+def suppression_factor(Q2, mass, n=1):
+    return (1 + Q2 / mass**2) ** (-n)
 
 # Elastic Photon Flux from Electron
 def flux_y_electron(ye, qmax2):
@@ -34,7 +41,7 @@ def flux_y_electron(ye, qmax2):
     y2 = (1.0 - ye) / ye
     flux1 = y1 * math.log(qmax2 / qmin2v)
     flux2 = y2 * (1.0 - qmin2v / qmax2)
-    return ALPHA2PI * (flux1 - flux2)
+    return ALPHA2PI * (flux1 - flux2) 
 
 # Elastic Photon Flux from Proton
 def flux_y_proton(yp, qmax2):
@@ -51,7 +58,7 @@ def flux_y_proton(yp, qmax2):
         formM = gM2
         flux_tmp = (1 - yp) * (1 - qmin2v / Q2) * formE + 0.5 * yp ** 2 * formM
         # Corrected integrand to include Q2 for change of variables
-        return flux_tmp * ALPHA2PI / (yp * Q2) * Q2  # Multiply by Q2 to account for change of variables
+        return flux_tmp * ALPHA2PI / (yp * Q2) * Q2 
 
     try:
         result, _ = integrate.quad(integrand, math.log(qmin2v), math.log(qmax2), epsrel=1e-4)
@@ -102,6 +109,7 @@ def cs_tautau_w_condition_Hamzeh(W):
 # Integrated Tau-Tau Production Cross-Section from W_0 to sqrt(s_cms)
 def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, qmax2e, qmax2p):
     s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
+    
     try:
         result, _ = integrate.quad(
             lambda W: cs_tautau_w_condition_Hamzeh(W) * flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, qmax2p),

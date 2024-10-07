@@ -4,6 +4,7 @@ import numpy as np
 import math
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
+from multiprocessing import Pool, cpu_count
 
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
@@ -23,7 +24,6 @@ def G_M(Q2):
 # Minimum Photon Virtuality
 def qmin2(mass, y):
     return mass * mass * y * y / (1 - y)
-
 
 # Elastic Photon Flux from Electron
 def flux_y_electron(ye, qmax2):
@@ -119,11 +119,6 @@ eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
 W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
 
-# Calculate the Elastic Photon-Photon Luminosity Spectrum at W = 10 GeV
-W_value = 10.0  # GeV
-luminosity_at_W10 = flux_el_yy_atW(W_value, eEbeam, pEbeam, q2emax, q2pmax)
-print(f"Elastic Photon-Photon Luminosity Spectrum at W = {W_value} GeV: {luminosity_at_W10:.6e} GeV^-1")
-
 # Calculate the Elastic Photon-Photon Luminosity Spectrum
 luminosity_values = [flux_el_yy_atW(W, eEbeam, pEbeam, q2emax, q2pmax) for W in W_values]
 
@@ -139,9 +134,9 @@ plt.figure(figsize=(10, 8))
 plt.xlim(10.0, 1000.0)
 plt.ylim(1.e-7, 1.e-1)
 
-plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic Photon-Photon Luminosity Spectrum')
-plt.xlabel(r"Center-of-Mass Energy $W$ [GeV]", fontsize=18)
-plt.ylabel(r"Photon-Photon Luminosity $S_{\gamma\gamma}$ [GeV$^{-1}$]", fontsize=18)
+plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic Luminosity')
+plt.xlabel(r"$W$ [GeV]", fontsize=18)
+plt.ylabel(r"$S_{\gamma\gamma}$ [GeV$^{-1}$]", fontsize=18)
 plt.title("Elastic Photon-Photon Luminosity Spectrum at LHeC", fontsize=20)
 plt.grid(True, which="both", linestyle="--")
 plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^1 \, \mathrm{GeV}^2$', fontsize=14)
@@ -155,7 +150,14 @@ plt.show()
 
 # Plot the Tau-Tau Production Cross-Section as a Function of W_0
 W0_range = np.arange(10.0, 1001.0, 1.0)  # Range of W_0 values from 10 GeV to 1000 GeV
-cross_section_values = [integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, q2emax, q2pmax) for W0 in W0_range]
+
+def compute_cross_section(W0):
+    return integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, q2emax, q2pmax)
+
+# Use multiprocessing to parallelize the calculation
+num_cpus = min(4, cpu_count())  # Set the number of CPUs to use
+with Pool(num_cpus) as pool:
+    cross_section_values = pool.map(compute_cross_section, W0_range)
 
 plt.figure(figsize=(10, 8))
 
@@ -164,13 +166,4 @@ plt.xlim(10.0, 1000.0)
 plt.ylim(1.e-3, 1.e2)
 
 plt.loglog(W0_range, cross_section_values, linestyle='solid', linewidth=2, label='Integrated Tau-Tau Production Cross-Section')
-plt.xlabel(r"Threshold Energy $W_0$ [GeV]", fontsize=18)
-plt.ylabel(r"Integrated Cross-Section $\sigma_{\tau^+\tau^-}$ (W > $W_0$) [pb]", fontsize=18)
-plt.title("Integrated Tau-Tau Production Cross-Section at LHeC", fontsize=20)
-plt.grid(True, which="both", linestyle="--")
-plt.legend(fontsize=14)
-
-# Save the plot as a PDF
-plt.savefig("integrated_tau_tau_cross_section.pdf")
-
-plt.show()
+plt.xlabel(r"$W
