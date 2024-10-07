@@ -1,2 +1,0 @@
-Luminosity Spectrum at W = 10 GeV: 8.176206325594887e-05
-Total Tau Tau Cross Section at W = 10 GeV: 6653.4196546834255
