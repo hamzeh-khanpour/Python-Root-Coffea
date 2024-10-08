@@ -29,11 +29,11 @@ def corrected_w_squared(e1, e2, theta, q1_squared, q2_squared):
     return 2 * e1 * e2 * (1 - math.cos(theta)) - q1_squared - q2_squared
 
 # Suppression Factor for Large Photon Virtuality
-def suppression_factor(Q2, mass, n=1):
-    return (1 + Q2 / mass**2) ** (-n)
+def suppression_factor(Q2, W, c=0.5):
+    return 1 / (1 + Q2 / (c * W**2))
 
 # Elastic Photon Flux from Electron
-def flux_y_electron(ye, qmax2):
+def flux_y_electron(ye, qmax2, W):
     if ye <= 0 or ye >= 1:
         return 0.0
     qmin2v = qmin2(emass, ye)
@@ -41,10 +41,11 @@ def flux_y_electron(ye, qmax2):
     y2 = (1.0 - ye) / ye
     flux1 = y1 * math.log(qmax2 / qmin2v)
     flux2 = y2 * (1.0 - qmin2v / qmax2)
-    return ALPHA2PI * (flux1 - flux2) 
+    suppression = suppression_factor(qmin2v, W)  # Apply suppression factor for large virtualities
+    return ALPHA2PI * (flux1 - flux2) * suppression
 
 # Elastic Photon Flux from Proton
-def flux_y_proton(yp, qmax2):
+def flux_y_proton(yp, qmax2, W):
     if yp <= 0 or yp >= 1:
         return 0.0
     qmin2v = qmin2(pmass, yp)
@@ -57,8 +58,8 @@ def flux_y_proton(yp, qmax2):
         formE = (4 * pmass ** 2 * gE2 + Q2 * gM2) / (4 * pmass ** 2 + Q2)
         formM = gM2
         flux_tmp = (1 - yp) * (1 - qmin2v / Q2) * formE + 0.5 * yp ** 2 * formM
-        # Corrected integrand to include Q2 for change of variables
-        return flux_tmp * ALPHA2PI / (yp * Q2) * Q2 
+        suppression = suppression_factor(Q2, W)  # Apply suppression factor for large virtualities
+        return flux_tmp * ALPHA2PI / (yp * Q2) * Q2 * suppression
 
     try:
         result, _ = integrate.quad(integrand, math.log(qmin2v), math.log(qmax2), epsrel=1e-4)
@@ -80,7 +81,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, qmax2p):
         yp = W * W / (s_cms * ye)
         if yp <= 0.0 or yp >= 1.0:
             return 0.0
-        return flux_y_proton(yp, qmax2p) * yp * flux_y_electron(ye, qmax2e)
+        return flux_y_proton(yp, qmax2p, W) * yp * flux_y_electron(ye, qmax2e, W)
 
     try:
         result, _ = integrate.quad(integrand, ymin, 1.0, epsrel=1e-4)
