@@ -10,7 +10,7 @@ ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4   # Electron mass
 pmass = 0.938272081    # Proton mass
 mtau = 1.77686  # Tau mass in GeV
-q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
+q2emax = 10.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
 q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2 (matching your settings)
 
 # Elastic Form Factors (Dipole Approximation)
@@ -24,13 +24,17 @@ def G_M(Q2):
 def qmin2(mass, y):
     return mass * mass * y * y / (1 - y)
 
+
+
 # Corrected Photon-Photon Center-of-Mass Energy Calculation
 def corrected_w_squared(e1, e2, theta, q1_squared, q2_squared):
     return 2 * e1 * e2 * (1 - math.cos(theta)) - q1_squared - q2_squared
 
 
+
+
 # Suppression Factor for Large Photon Virtuality (Exponential Form)
-def suppression_factor(Q2, W, c=0.1):
+def suppression_factor(Q2, W, c=0.2):
     return np.exp(-Q2 / (c * W**2))
 
 
@@ -63,6 +67,8 @@ def flux_y_electron(ye, qmax2, W):
     return ALPHA2PI * result
 
 
+
+
 # Elastic Photon Flux from Proton
 def flux_y_proton(yp, qmax2, W):
     if yp <= 0 or yp >= 1:
@@ -90,6 +96,9 @@ def flux_y_proton(yp, qmax2, W):
         result = 0.0
     return result
 
+
+
+
 # Elastic Photon-Photon Luminosity Spectrum Calculation at Given W
 def flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, qmax2p):
     s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
@@ -112,6 +121,8 @@ def flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, qmax2p):
         result = 0.0
     return result * 2.0 / W
 
+
+
 # Tau-Tau Production Cross-Section Calculation at Given W
 def cs_tautau_w_condition_Hamzeh(W):
     alpha = 1 / 137.0
@@ -125,6 +136,9 @@ def cs_tautau_w_condition_Hamzeh(W):
         (3 - beta**4) / (2 * beta) * math.log((1 + beta) / (1 - beta)) - 2 + beta**2
     ) * 1e9
     return cross_section
+
+
+
 
 # Integrated Tau-Tau Production Cross-Section from W_0 to sqrt(s_cms)
 def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, qmax2e, qmax2p):
@@ -141,6 +155,8 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, qmax2e, qmax2p):
         print(f"Error during integration for tau-tau production cross-section: {e}")
         result = 0.0
     return result
+
+
 
 
 
@@ -182,7 +198,9 @@ plt.savefig("elastic_photon_luminosity_spectrum.jpg")
 
 plt.show()
 
+
 ################################################################################
+
 
 # Plot the Tau-Tau Production Cross-Section as a Function of W_0
 W0_range = np.arange(10.0, 1001.0, 1.0)  # Range of W_0 values from 10 GeV to 1000 GeV

@@ -13,7 +13,7 @@ def qmin2(mass, y):
     return mass * mass * y * y / (1 - y)
 
 # Suppression Factor for Large Photon Virtuality (Exponential Form)
-def suppression_factor(Q2, W, c=0.1):
+def suppression_factor(Q2, W, c=0.2):
     return np.exp(-Q2 / (c * W**2))
 
 # Elastic Photon Flux from Electron (with suppression factor)
