@@ -28,21 +28,40 @@ def qmin2(mass, y):
 def corrected_w_squared(e1, e2, theta, q1_squared, q2_squared):
     return 2 * e1 * e2 * (1 - math.cos(theta)) - q1_squared - q2_squared
 
-# Suppression Factor for Large Photon Virtuality
-def suppression_factor(Q2, W, c=0.5):
-    return 1 / (1 + Q2 / (c * W**2))
 
-# Elastic Photon Flux from Electron
+# Suppression Factor for Large Photon Virtuality (Exponential Form)
+def suppression_factor(Q2, W, c=0.1):
+    return np.exp(-Q2 / (c * W**2))
+
+
+
+# Elastic Photon Flux from Electron (with full Q2 integration using lnQ2 change of variable)
 def flux_y_electron(ye, qmax2, W):
     if ye <= 0 or ye >= 1:
         return 0.0
     qmin2v = qmin2(emass, ye)
-    y1 = 0.5 * (1.0 + (1.0 - ye) ** 2) / ye
-    y2 = (1.0 - ye) / ye
-    flux1 = y1 * math.log(qmax2 / qmin2v)
-    flux2 = y2 * (1.0 - qmin2v / qmax2)
-    suppression = suppression_factor(qmin2v, W)  # Apply suppression factor for large virtualities
-    return ALPHA2PI * (flux1 - flux2) * suppression
+
+    # Integration over ln(Q2) from ln(qmin2) to ln(qmax2)
+    def integrand(lnQ2):
+        Q2 = np.exp(lnQ2)
+        y1 = 0.5 * (1.0 + (1.0 - ye) ** 2) / ye
+        y2 = (1.0 - ye) / ye
+        flux1 = y1 / Q2
+        flux2 = y2 / qmax2
+        suppression = suppression_factor(Q2, W)  # Apply suppression factor for large virtualities
+        return (flux1 - flux2) * suppression * Q2  # Multiply by Q2 to account for change of variable
+
+    try:
+        result, _ = integrate.quad(integrand, math.log(qmin2v), math.log(qmax2), epsrel=1e-4)
+    except integrate.IntegrationWarning:
+        print(f"Warning: Integration for electron flux did not converge for ye={ye}")
+        result = 0.0
+    except Exception as e:
+        print(f"Error during integration for electron flux: {e}")
+        result = 0.0
+
+    return ALPHA2PI * result
+
 
 # Elastic Photon Flux from Proton
 def flux_y_proton(yp, qmax2, W):
@@ -58,7 +77,7 @@ def flux_y_proton(yp, qmax2, W):
         formE = (4 * pmass ** 2 * gE2 + Q2 * gM2) / (4 * pmass ** 2 + Q2)
         formM = gM2
         flux_tmp = (1 - yp) * (1 - qmin2v / Q2) * formE + 0.5 * yp ** 2 * formM
-        suppression = suppression_factor(Q2, W)  # Apply suppression factor for large virtualities
+        suppression = suppression_factor(Q2, W)  # Apply exponential suppression factor for large virtualities
         return flux_tmp * ALPHA2PI / (yp * Q2) * Q2 * suppression
 
     try:
@@ -97,7 +116,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, qmax2p):
 def cs_tautau_w_condition_Hamzeh(W):
     alpha = 1 / 137.0
     hbarc2 = 0.389  # Conversion factor to pb
-    mtau = 1.77686  # Tau mass in GeV
+    mtau = 1.77686  # Tau mass in GeV      mmuon = 0.105658   melectron = 0.511 * 1e-3      mtau = 1.77686
     
     if W < 2 * mtau:
         return 0.0
@@ -122,6 +141,8 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, qmax2e, qmax2p):
         print(f"Error during integration for tau-tau production cross-section: {e}")
         result = 0.0
     return result
+
+
 
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
@@ -157,6 +178,7 @@ plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^1 \, \mathrm{G
 
 # Save the plot as a PDF
 plt.savefig("elastic_photon_luminosity_spectrum.pdf")
+plt.savefig("elastic_photon_luminosity_spectrum.jpg")
 
 plt.show()
 
@@ -181,5 +203,7 @@ plt.legend(fontsize=14)
 
 # Save the plot as a PDF
 plt.savefig("integrated_tau_tau_cross_section.pdf")
+plt.savefig("integrated_tau_tau_cross_section.jpg")
 
 plt.show()
+
