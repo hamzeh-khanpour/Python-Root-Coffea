@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
-emass = 5.1099895e-4   # Electron mass
-pmass = 0.938272081    # Proton mass
+emass = 5.1099895e-4  # Electron mass
+pmass = 0.938272081   # Proton mass
 
-q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
-q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2 (matching your settings)
+q2emax = 10.0      # Maximum photon virtuality for electron in GeV^2 (matching your settings)
+q2pmax = 10.0      # Maximum photon virtuality for proton in GeV^2 (matching your settings)
 
 # Elastic Form Factors (Dipole Approximation)
 def G_E(Q2):
@@ -24,26 +24,32 @@ def G_M(Q2):
 def qmin2(mass, y):
     return mass * mass * y * y / (1 - y)
 
-
-
-
-
-# Elastic Photon Flux from Electron
+# Exact Photon Flux from Electron (Bethe-Heitler/Weizsäcker-Williams Formalism)
 def flux_y_electron(ye, qmax2):
     if ye <= 0 or ye >= 1:
         return 0.0
     qmin2v = qmin2(emass, ye)
-    y1 = 0.5 * (1.0 + (1.0 - ye) ** 2) / ye
-    y2 = (1.0 - ye) / ye
-    flux1 = y1 * math.log(qmax2 / qmin2v)
-    flux2 = y2 * (1.0 - qmin2v / qmax2)
-    return ALPHA2PI * (flux1 - flux2)
 
+    # Integration over Q2 from qmin2 to qmax2
+    def integrand(lnQ2):
+        Q2 = np.exp(lnQ2)
+        # Using exact photon flux expression for an electron (Bethe-Heitler formalism)
+        y1 = 0.5 * (1.0 + (1.0 - ye) ** 2) / ye
+        flux = y1 / (Q2 + emass**2)  # Retain Q^2 dependence accurately
+        return flux * Q2  # Multiply by Q2 to account for change of variable
 
+    try:
+        result, _ = integrate.quad(integrand, math.log(qmin2v), math.log(qmax2), epsrel=1e-4)
+    except integrate.IntegrationWarning:
+        print(f"Warning: Integration for electron flux did not converge for ye={ye}")
+        result = 0.0
+    except Exception as e:
+        print(f"Error during integration for electron flux: {e}")
+        result = 0.0
 
+    return ALPHA2PI * result
 
-
-# Elastic Photon Flux from Proton
+# Elastic Photon Flux from Proton (Exact QED Form)
 def flux_y_proton(yp, qmax2):
     if yp <= 0 or yp >= 1:
         return 0.0
@@ -57,8 +63,7 @@ def flux_y_proton(yp, qmax2):
         formE = (4 * pmass ** 2 * gE2 + Q2 * gM2) / (4 * pmass ** 2 + Q2)
         formM = gM2
         flux_tmp = (1 - yp) * (1 - qmin2v / Q2) * formE + 0.5 * yp ** 2 * formM
-        # Corrected integrand to include Q2 for change of variables
-        return flux_tmp * ALPHA2PI / (yp * Q2) * Q2  # Multiply by Q2 to account for change of variables
+        return flux_tmp * ALPHA2PI / (yp * Q2) * Q2  # Multiply by Q2 to account for change of variable
 
     try:
         result, _ = integrate.quad(integrand, math.log(qmin2v), math.log(qmax2), epsrel=1e-4)
@@ -97,7 +102,7 @@ def cs_tautau_w_condition_Hamzeh(W):
     alpha = 1 / 137.0
     hbarc2 = 0.389  # Conversion factor to pb
     mtau = 1.77686  # Tau mass in GeV
-    
+
     if W < 2 * mtau:
         return 0.0
     beta = math.sqrt(1.0 - 4.0 * mtau**2 / W**2)
@@ -109,6 +114,7 @@ def cs_tautau_w_condition_Hamzeh(W):
 # Integrated Tau-Tau Production Cross-Section from W_0 to sqrt(s_cms)
 def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, qmax2e, qmax2p):
     s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
+
     try:
         result, _ = integrate.quad(
             lambda W: cs_tautau_w_condition_Hamzeh(W) * flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, qmax2p),
@@ -154,30 +160,5 @@ plt.grid(True, which="both", linestyle="--")
 plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^1 \, \mathrm{GeV}^2$', fontsize=14)
 
 # Save the plot as a PDF
-plt.savefig("elastic_photon_luminosity_spectrum.pdf")
-
-plt.show()
-
-################################################################################
-
-# Plot the Tau-Tau Production Cross-Section as a Function of W_0
-W0_range = np.arange(10.0, 1001.0, 1.0)  # Range of W_0 values from 10 GeV to 1000 GeV
-cross_section_values = [integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, q2emax, q2pmax) for W0 in W0_range]
-
-plt.figure(figsize=(10, 8))
-
-# Set plotting range
-plt.xlim(10.0, 1000.0)
-plt.ylim(1.e-3, 1.e2)
-
-plt.loglog(W0_range, cross_section_values, linestyle='solid', linewidth=2, label='Integrated Tau-Tau Production Cross-Section')
-plt.xlabel(r"Threshold Energy $W_0$ [GeV]", fontsize=18)
-plt.ylabel(r"Integrated Cross-Section $\sigma_{\tau^+\tau^-}$ (W > $W_0$) [pb]", fontsize=18)
-plt.title("Integrated Tau-Tau Production Cross-Section at LHeC", fontsize=20)
-plt.grid(True, which="both", linestyle="--")
-plt.legend(fontsize=14)
-
-# Save the plot as a PDF
-plt.savefig("integrated_tau_tau_cross_section.pdf")
-
+plt.savefig("elastic_photon_luminosity_spectrum_exact_flux.pdf")
 plt.show()

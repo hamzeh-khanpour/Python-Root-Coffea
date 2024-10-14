@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4   # Electron mass
 pmass = 0.938272081    # Proton mass
-
-q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
-q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2 (matching your settings)
+mtau = 1.77686  # Tau mass in GeV
+q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
 
 # Elastic Form Factors (Dipole Approximation)
 def G_E(Q2):
@@ -26,24 +26,40 @@ def qmin2(mass, y):
 
 
 
+# Suppression Factor for Large Photon Virtuality with Dependence on y
+def suppression_factor(Q2, y, c=0.2):
+    return np.exp(-Q2 / (c * y * (1 - y)))
 
 
-# Elastic Photon Flux from Electron
+
+# Elastic Photon Flux from Electron (with full Q2 integration using lnQ2 change of variable)
 def flux_y_electron(ye, qmax2):
     if ye <= 0 or ye >= 1:
         return 0.0
     qmin2v = qmin2(emass, ye)
-    y1 = 0.5 * (1.0 + (1.0 - ye) ** 2) / ye
-    y2 = (1.0 - ye) / ye
-    flux1 = y1 * math.log(qmax2 / qmin2v)
-    flux2 = y2 * (1.0 - qmin2v / qmax2)
-    return ALPHA2PI * (flux1 - flux2)
 
+    # Integration over ln(Q2) from ln(qmin2) to ln(qmax2)
+    def integrand(lnQ2):
+        Q2 = np.exp(lnQ2)
+        y1 = 0.5 * (1.0 + (1.0 - ye) ** 2) / ye
+        y2 = (1.0 - ye) / ye
+        flux1 = y1 / Q2
+        flux2 = y2 / qmax2
+        suppression = suppression_factor(Q2, ye)  # Apply new suppression factor based on y
+        return (flux1 - flux2) * suppression * Q2  # Multiply by Q2 to account for change of variable
 
+    try:
+        result, _ = integrate.quad(integrand, math.log(qmin2v), math.log(qmax2), epsrel=1e-4)
+    except integrate.IntegrationWarning:
+        print(f"Warning: Integration for electron flux did not converge for ye={ye}")
+        result = 0.0
+    except Exception as e:
+        print(f"Error during integration for electron flux: {e}")
+        result = 0.0
 
+    return ALPHA2PI * result
 
-
-# Elastic Photon Flux from Proton
+# Elastic Photon Flux from Proton (updated suppression factor)
 def flux_y_proton(yp, qmax2):
     if yp <= 0 or yp >= 1:
         return 0.0
@@ -57,8 +73,8 @@ def flux_y_proton(yp, qmax2):
         formE = (4 * pmass ** 2 * gE2 + Q2 * gM2) / (4 * pmass ** 2 + Q2)
         formM = gM2
         flux_tmp = (1 - yp) * (1 - qmin2v / Q2) * formE + 0.5 * yp ** 2 * formM
-        # Corrected integrand to include Q2 for change of variables
-        return flux_tmp * ALPHA2PI / (yp * Q2) * Q2  # Multiply by Q2 to account for change of variables
+        suppression = suppression_factor(Q2, yp)  # Apply new suppression factor based on y
+        return flux_tmp * ALPHA2PI / (yp * Q2) * Q2 * suppression
 
     try:
         result, _ = integrate.quad(integrand, math.log(qmin2v), math.log(qmax2), epsrel=1e-4)
@@ -97,7 +113,7 @@ def cs_tautau_w_condition_Hamzeh(W):
     alpha = 1 / 137.0
     hbarc2 = 0.389  # Conversion factor to pb
     mtau = 1.77686  # Tau mass in GeV
-    
+
     if W < 2 * mtau:
         return 0.0
     beta = math.sqrt(1.0 - 4.0 * mtau**2 / W**2)
@@ -109,6 +125,7 @@ def cs_tautau_w_condition_Hamzeh(W):
 # Integrated Tau-Tau Production Cross-Section from W_0 to sqrt(s_cms)
 def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, qmax2e, qmax2p):
     s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
+
     try:
         result, _ = integrate.quad(
             lambda W: cs_tautau_w_condition_Hamzeh(W) * flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, qmax2p),
@@ -155,6 +172,7 @@ plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^1 \, \mathrm{G
 
 # Save the plot as a PDF
 plt.savefig("elastic_photon_luminosity_spectrum.pdf")
+plt.savefig("elastic_photon_luminosity_spectrum.jpg")
 
 plt.show()
 
@@ -179,5 +197,6 @@ plt.legend(fontsize=14)
 
 # Save the plot as a PDF
 plt.savefig("integrated_tau_tau_cross_section.pdf")
+plt.savefig("integrated_tau_tau_cross_section.jpg")
 
 plt.show()
