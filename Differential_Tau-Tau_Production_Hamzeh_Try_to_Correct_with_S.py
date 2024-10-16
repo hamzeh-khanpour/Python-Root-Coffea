@@ -155,6 +155,14 @@ plt.ylim(1.e-5, 1.e2)
 
 
 plt.loglog(W_values, differential_cross_section_values, linestyle='solid', linewidth=2, label='Elastic')
+
+# Add text to the plot for additional information
+plt.text(25, 1.e1, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
+plt.text(25, 5.e0, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
+plt.text(25, 2.e0, f'Differential Cross-Section at W={W_value} GeV = {differential_cross_section_value:.2e} pb/GeV', fontsize=14, color='blue')
+plt.text(25, 1.e0, f'Total Cross-Section = {total_cross_section:.2e} pb', fontsize=14, color='blue')
+
+
 plt.xlabel(r"$W$ [GeV]", fontsize=18)
 plt.ylabel(r"$\frac{d\sigma_{\tau^+\tau^-}}{dW}$ [pb/GeV]", fontsize=18)
 plt.title("Differential Tau-Tau Production Cross-Section at LHeC (Corrected)", fontsize=20)
