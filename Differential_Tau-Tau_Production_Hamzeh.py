@@ -1,9 +1,11 @@
-# Elastic Photon-Photon Luminosity Spectrum at LHeC --- Hamzeh Khanpour October 2024
+# Differential Tau-Tau Production Cross-Section as a Function of W --- Hamzeh Khanpour October 2024
 
 import numpy as np
 import math
 import scipy.integrate as integrate
+from scipy import integrate
 import matplotlib.pyplot as plt
+
 
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
@@ -24,10 +26,6 @@ def G_M(Q2):
 def qmin2(mass, y):
     return mass * mass * y * y / (1 - y)
 
-
-
-
-
 # Elastic Photon Flux from Electron
 def flux_y_electron(ye, qmax2):
     if ye <= 0 or ye >= 1:
@@ -38,10 +36,6 @@ def flux_y_electron(ye, qmax2):
     flux1 = y1 * math.log(qmax2 / qmin2v)
     flux2 = y2 * (1.0 - qmin2v / qmax2)
     return ALPHA2PI * (flux1 - flux2)
-
-
-
-
 
 # Elastic Photon Flux from Proton
 def flux_y_proton(yp, qmax2):
@@ -96,7 +90,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, qmax2p):
 def cs_tautau_w_condition_Hamzeh(W):
     alpha = 1 / 137.0
     hbarc2 = 0.389  # Conversion factor to pb
-    mtau = 1.77686  # Tau mass in GeV      mmuon = 0.105658   melectron = 0.511 * 1e-3      mtau = 1.77686
+    mtau = 1.77686  # Tau mass in GeV
     
     if W < 2 * mtau:
         return 0.0
@@ -106,80 +100,49 @@ def cs_tautau_w_condition_Hamzeh(W):
     ) * 1e9
     return cross_section
 
-# Integrated Tau-Tau Production Cross-Section from W_0 to sqrt(s_cms)
-def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, qmax2e, qmax2p):
-    s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
-    try:
-        result, _ = integrate.quad(
-            lambda W: cs_tautau_w_condition_Hamzeh(W) * flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, qmax2p),
-            W0, np.sqrt(s_cms), epsrel=1e-4)
-    except integrate.IntegrationWarning:
-        print(f"Warning: Integration for tau-tau production cross-section did not converge for W_0={W0}")
-        result = 0.0
-    except Exception as e:
-        print(f"Error during integration for tau-tau production cross-section: {e}")
-        result = 0.0
-    return result
+# Differential Tau-Tau Production Cross-Section as a Function of W
+def differential_tau_tau_cross_section(W, eEbeam, pEbeam, qmax2e, qmax2p):
+    return cs_tautau_w_condition_Hamzeh(W) * flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, q2pmax)
 
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
 W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
 
-# Calculate the Elastic Photon-Photon Luminosity Spectrum at W = 10 GeV
+# Calculate the Differential Tau-Tau Production Cross-Section at W = 10 GeV
 W_value = 10.0  # GeV
-luminosity_at_W10 = flux_el_yy_atW(W_value, eEbeam, pEbeam, q2emax, q2pmax)
-print(f"Elastic Photon-Photon Luminosity Spectrum at W = {W_value} GeV: {luminosity_at_W10:.6e} GeV^-1")
+differential_cross_section_value = differential_tau_tau_cross_section(W_value, eEbeam, pEbeam, q2emax, q2pmax)
+print(f"Differential Tau-Tau Production Cross-Section at W = {W_value} GeV: {differential_cross_section_value:.6e} pb/GeV")
 
-# Calculate the Elastic Photon-Photon Luminosity Spectrum
-luminosity_values = [flux_el_yy_atW(W, eEbeam, pEbeam, q2emax, q2pmax) for W in W_values]
+# Calculate the Differential Tau-Tau Production Cross-Section for a Range of W values
+differential_cross_section_values = [differential_tau_tau_cross_section(W, eEbeam, pEbeam, q2emax, q2pmax) for W in W_values]
 
-# Calculate Integrated Tau-Tau Production Cross-Section at W_0 = 10 GeV
-W0_value = 10.0  # GeV
-integrated_cross_section_value = integrated_tau_tau_cross_section(W0_value, eEbeam, pEbeam, q2emax, q2pmax)
-print(f"Integrated Tau-Tau Production Cross-Section at W_0 = {W0_value} GeV: {integrated_cross_section_value:.6e} pb")
 
-# Plot the Elastic Photon-Photon Luminosity Spectrum
+
+# Calculate the Area Under the Curve (Total Cross-Section)
+total_cross_section = np.trapz(differential_cross_section_values, W_values)
+print(f"Total Cross-Section (Area under the curve) = {total_cross_section:.6e} pb")
+
+
+# Plot the Differential Tau-Tau Production Cross-Section
 plt.figure(figsize=(10, 8))
+
 
 # Set plotting range
 plt.xlim(10.0, 1000.0)
-plt.ylim(1.e-7, 1.e-1)
+plt.ylim(1.e-5, 1.e2)
 
-plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic Photon-Photon Luminosity Spectrum')
-plt.xlabel(r"Center-of-Mass Energy $W$ [GeV]", fontsize=18)
-plt.ylabel(r"Photon-Photon Luminosity $S_{\gamma\gamma}$ [GeV$^{-1}$]", fontsize=18)
-plt.title("Elastic Photon-Photon Luminosity Spectrum at LHeC", fontsize=20)
+
+plt.loglog(W_values, differential_cross_section_values, linestyle='solid', linewidth=2, label='Elastic')
+plt.xlabel(r"$W$ [GeV]", fontsize=18)
+plt.ylabel(r"$\frac{d\sigma_{\tau^+\tau^-}}{dW}$ [pb/GeV]", fontsize=18)
+plt.title("Differential tau-tau production cross-section at LHeC", fontsize=20)
 plt.grid(True, which="both", linestyle="--")
-plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
+plt.legend(title=r'$Q^2_e < 100 \, \mathrm{GeV}^2, \, Q^2_p < 100 \, \mathrm{GeV}^2$', fontsize=14)
 
 # Save the plot as a PDF
-plt.savefig("elastic_photon_luminosity_spectrum.pdf")
-plt.savefig("elastic_photon_luminosity_spectrum.jpg")
+plt.savefig("differential_tau_tau_cross_section.pdf")
+plt.savefig("differential_tau_tau_cross_section.jpg")
 
 plt.show()
 
-################################################################################
-
-# Plot the Tau-Tau Production Cross-Section as a Function of W_0
-W0_range = np.arange(10.0, 1001.0, 1.0)  # Range of W_0 values from 10 GeV to 1000 GeV
-cross_section_values = [integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, q2emax, q2pmax) for W0 in W0_range]
-
-plt.figure(figsize=(10, 8))
-
-# Set plotting range
-plt.xlim(10.0, 1000.0)
-plt.ylim(1.e-3, 1.e2)
-
-plt.loglog(W0_range, cross_section_values, linestyle='solid', linewidth=2, label='Integrated Tau-Tau Production Cross-Section')
-plt.xlabel(r"Threshold Energy $W_0$ [GeV]", fontsize=18)
-plt.ylabel(r"Integrated Cross-Section $\sigma_{\tau^+\tau^-}$ (W > $W_0$) [pb]", fontsize=18)
-plt.title("Integrated Tau-Tau Production Cross-Section at LHeC", fontsize=20)
-plt.grid(True, which="both", linestyle="--")
-plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
-
-# Save the plot as a PDF
-plt.savefig("integrated_tau_tau_cross_section.pdf")
-plt.savefig("integrated_tau_tau_cross_section.jpg") 
-
-plt.show()
