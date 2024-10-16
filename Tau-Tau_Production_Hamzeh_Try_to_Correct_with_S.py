@@ -185,9 +185,17 @@ plt.figure(figsize=(10, 8))
 plt.xlim(10.0, 1000.0)
 plt.ylim(1.e-7, 1.e-1)
 
-plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic Photon-Photon Luminosity Spectrum')
-plt.xlabel(r"Center-of-Mass Energy $W$ [GeV]", fontsize=18)
-plt.ylabel(r"Photon-Photon Luminosity $S_{\gamma\gamma}$ [GeV$^{-1}$]", fontsize=18)
+plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic')
+
+
+# Add additional information to the plot
+plt.text(15, 5.e-6, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
+plt.text(15, 2.e-6, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
+plt.text(15, 1.e-6, f'Luminosity at W={W_value} GeV = {luminosity_at_W10:.2e} GeV^-1', fontsize=14, color='blue')
+
+
+plt.xlabel(r"$W$ [GeV]", fontsize=18)
+plt.ylabel(r"$S_{\gamma\gamma}$ [GeV$^{-1}$]", fontsize=18)
 plt.title("Elastic Photon-Photon Luminosity Spectrum (Corrected)", fontsize=20)
 plt.grid(True, which="both", linestyle="--")
 plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
@@ -212,9 +220,17 @@ plt.figure(figsize=(10, 8))
 plt.xlim(10.0, 1000.0)
 plt.ylim(1.e-3, 1.e2)
 
-plt.loglog(W0_range, cross_section_values, linestyle='solid', linewidth=2, label='Integrated Tau-Tau Production Cross-Section')
-plt.xlabel(r"Threshold Energy $W_0$ [GeV]", fontsize=18)
-plt.ylabel(r"Integrated Cross-Section $\sigma_{\tau^+\tau^-}$ (W > $W_0$) [pb]", fontsize=18)
+plt.loglog(W0_range, cross_section_values, linestyle='solid', linewidth=2, label='Elastic')
+
+
+# Add additional information to the plot
+plt.text(15, 2.e-2, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
+plt.text(15, 1.e-2, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
+plt.text(15, 5.e-3, f'Integrated Tau-Tau Cross-Section at W_0={W0_value} GeV = {integrated_cross_section_value:.2e} pb', fontsize=14, color='blue')
+
+
+plt.xlabel(r"$W_0$ [GeV]", fontsize=18)
+plt.ylabel(r"$\sigma_{\tau^+\tau^-}$ (W > $W_0$) [pb]", fontsize=18)
 plt.title("Integrated Tau-Tau Production Cross-Section at LHeC  (Corrected)", fontsize=20)
 plt.grid(True, which="both", linestyle="--")
 plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
