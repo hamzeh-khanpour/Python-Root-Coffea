@@ -59,6 +59,10 @@ def flux_y_electron(ye, qmax2):
 
     return ALPHA2PI * result
 
+
+
+
+
 # Elastic Photon Flux from Proton (updated suppression factor)
 def flux_y_proton(yp, qmax2):
     if yp <= 0 or yp >= 1:
