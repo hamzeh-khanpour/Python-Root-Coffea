@@ -1,31 +1,36 @@
-# Elastic Photon-Photon Luminosity Spectrum at LHeC --- Updated Version with Monte Carlo Integration
+# Elastic Photon-Photon Luminosity Spectrum at LHeC --- Updated Version with Numba for Efficiency and Simplified Integrations
 
 import numpy as np
 import math
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
-import vegas
+from multiprocessing import Pool
+from numba import jit
 
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4   # Electron mass
-pmass = 0.938272081    # Proton mass 
+pmass = 0.938272081    # Proton mass
 
 q2emax = 100.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
 q2pmax = 100.0  # Maximum photon virtuality for proton in GeV^2 (matching your settings)
 
 # Elastic Form Factors (Dipole Approximation)
+@jit(nopython=True)
 def G_E(Q2):
     return (1 + Q2 / 0.71) ** (-4)
 
+@jit(nopython=True)
 def G_M(Q2):
     return 7.78 * G_E(Q2)
 
 # Minimum Photon Virtuality
+@jit(nopython=True)
 def qmin2(mass, y):
     return (mass * y)**2 / (1 - y)
 
 # Photon Flux from Electron
+@jit(nopython=True)
 def flux_y_electron(ye, Q2e):
     if ye <= 0 or ye >= 1:
         return 0.0
@@ -39,6 +44,7 @@ def flux_y_electron(ye, Q2e):
     return flux
 
 # Photon Flux from Proton
+@jit(nopython=True)
 def flux_y_proton(yp, Q2p):
     if yp <= 0 or yp >= 1:
         return 0.0
@@ -56,32 +62,51 @@ def flux_y_proton(yp, Q2p):
     )
     return flux
 
-# Monte Carlo Integration for Elastic Photon-Photon Luminosity Spectrum Calculation at Given W
-def flux_el_yy_atW_monte_carlo(W, eEbeam, pEbeam):
+# Elastic Photon-Photon Luminosity Spectrum Calculation at Given W (Exact formula for W^2)
+def flux_el_yy_atW(W, eEbeam, pEbeam):
     s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
 
-    def monte_carlo_integrand(x):
-        ye, Q2e, yp, Q2p = x
-        W2_exact = ye * yp * s_cms - Q2e - Q2p
-        if W2_exact <= 0.0:
-            return 0.0
+    # Integration over ye from ye_min to ye_max (which is 1)
+    ye_min = W**2 / s_cms
 
-        # Calculate photon fluxes
-        flux_e = flux_y_electron(ye, Q2e)
-        flux_p = flux_y_proton(yp, Q2p)
+    def integrand(ye):
+        Q2e_min = qmin2(emass, ye)
+        Q2e_max = q2emax
 
-        return flux_e * flux_p
+        # Integration over Q2_e from Q2e_min to Q2e_max
+        def Q2e_integrand(Q2e):
+            yp_min = (W**2 + Q2e) / (s_cms * ye)
+            yp_max = 1.0
 
-    # Define limits of integration
-    ye_min, ye_max = W**2 / s_cms, 1.0
-    Q2e_min, Q2e_max = 0.0, q2emax
-    yp_min, yp_max = 0.0, 1.0
-    Q2p_min, Q2p_max = 0.0, q2pmax
+            # Integration over yp from yp_min to yp_max (which is 1)
+            def proton_integrand(yp):
+                Q2p_min = qmin2(pmass, yp)
+                Q2p_max = q2pmax
 
-    # Set up Monte Carlo integrator
-    integ = vegas.Integrator([[ye_min, ye_max], [Q2e_min, Q2e_max], [yp_min, yp_max], [Q2p_min, Q2p_max]])
-    result = integ(monte_carlo_integrand, nitn=10, neval=1e4)
-    return result.mean
+                # Integration over Q2_p from Q2p_min to Q2p_max
+                def Q2p_integrand(Q2p):
+                    # Exact treatment of W^2 = ye * yp * s - Qe^2 - Qp^2
+                    W2_exact = ye * yp * s_cms - Q2e - Q2p
+                    if W2_exact <= 0.0:
+                        return 0.0
+
+                    # Calculate photon fluxes
+                    flux_e = flux_y_electron(ye, Q2e)
+                    flux_p = flux_y_proton(yp, Q2p)
+
+                    return flux_e * flux_p
+
+                result_Q2p, _ = integrate.quad(Q2p_integrand, Q2p_min, Q2p_max, epsrel=1e-4)
+                return result_Q2p
+
+            result_yp, _ = integrate.quad(proton_integrand, yp_min, yp_max, epsrel=1e-4)
+            return result_yp
+
+        result_Q2e, _ = integrate.quad(Q2e_integrand, Q2e_min, Q2e_max, epsrel=1e-4)
+        return result_Q2e
+
+    result_ye, _ = integrate.quad(integrand, ye_min, 1.0, epsrel=1e-4)
+    return result_ye
 
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
@@ -89,13 +114,18 @@ pEbeam = 7000.0  # Proton beam energy in GeV
 
 W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
 
-# Calculate the Elastic Photon-Photon Luminosity Spectrum using Monte Carlo Integration
+# Wrapper function for parallel processing
+def wrapper_flux_el_yy_atW(W):
+    return flux_el_yy_atW(W, eEbeam, pEbeam)
+
+# Parallel Calculation of the Elastic Photon-Photon Luminosity Spectrum
 if __name__ == "__main__":
-    luminosity_values = [flux_el_yy_atW_monte_carlo(W, eEbeam, pEbeam) for W in W_values]
+    with Pool() as pool:
+        luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
 
     # Calculate the Elastic Photon-Photon Luminosity Spectrum at W = 10 GeV
     W_value = 10.0  # GeV
-    luminosity_at_W10 = flux_el_yy_atW_monte_carlo(W_value, eEbeam, pEbeam)
+    luminosity_at_W10 = flux_el_yy_atW(W_value, eEbeam, pEbeam)
     print(f"Elastic Photon-Photon Luminosity Spectrum at W = {W_value} GeV: {luminosity_at_W10:.6e} GeV^-1")
 
     # Plot the Results
