@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4   # Electron mass
-pmass = 0.938272081    # Proton mass
+pmass = 0.938272081    # Proton mass 
 
 q2emax = 100.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
 q2pmax = 100.0  # Maximum photon virtuality for proton in GeV^2 (matching your settings)
