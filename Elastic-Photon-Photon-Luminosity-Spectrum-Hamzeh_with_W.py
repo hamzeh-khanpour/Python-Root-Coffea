@@ -5,29 +5,20 @@ import math
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 
-
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4   # Electron mass
 pmass = 0.938272081    # Proton mass
 
-
-
 q2emax = 100.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
 q2pmax = 100.0  # Maximum photon virtuality for proton in GeV^2 (matching your settings)
-
-
 
 # Elastic Form Factors (Dipole Approximation)
 def G_E(Q2):
     return (1 + Q2 / 0.71) ** (-4)
 
-
-
 def G_M(Q2):
     return 7.78 * G_E(Q2)
-
-
 
 # Minimum Photon Virtuality
 def qmin2(mass, y):
@@ -64,9 +55,10 @@ def flux_y_proton(yp, Q2p):
     formM = gM2
 
     flux = ALPHA2PI / (yp * Q2p) * (
-        (1 - yp) * formE + 0.5 * yp**2 * formM
+        (1 - yp) * (1 - qmin2v / Q2p) * formE + 0.5 * yp**2 * formM
     )
     return flux
+
 
 
 
@@ -83,7 +75,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
 
         # Integration over Q2_e from Q2e_min to Q2e_max
         def Q2e_integrand(Q2e):
-            yp_min = (W**2) / (s_cms)       # yp_min = (W**2 + Q2e) / (s_cms * ye)
+            yp_min = (W**2 + Q2e) / (s_cms * ye)
             yp_max = 1.0
 
             # Integration over yp from yp_min to yp_max (which is 1)
@@ -151,40 +143,44 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
 
 
 
-
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
 
 W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
 
-
-
 # Calculate the Elastic Photon-Photon Luminosity Spectrum
 luminosity_values = [flux_el_yy_atW(W, eEbeam, pEbeam) for W in W_values]
 
+# Calculate the Elastic Photon-Photon Luminosity Spectrum at W = 10 GeV
+W_value = 10.0  # GeV
+luminosity_at_W10 = flux_el_yy_atW(W_value, eEbeam, pEbeam)
+print(f"Elastic Photon-Photon Luminosity Spectrum at W = {W_value} GeV: {luminosity_at_W10:.6e} GeV^-1")
 
 # Plot the Results
 plt.figure(figsize=(10, 8))
 plt.xlim(10.0, 1000.0)
 plt.ylim(1.e-7, 1.e-1)
 
-
 plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic')
 
+# Marking W_0 = 10 GeV on the plot
+plt.scatter(W_value, luminosity_at_W10, color='red', zorder=5)
+plt.text(W_value, luminosity_at_W10 * 1.5, f'$W_0 = 10$ GeV\n$S_{{\gamma\gamma}} = {luminosity_at_W10:.2e}$', color='red', fontsize=10, ha='center')
 
+
+# Plot settings
 plt.xlabel(r"$W$ [GeV]", fontsize=18)
-
-
 plt.ylabel(r"$S_{\gamma\gamma}$ [GeV$^{-1}$]", fontsize=18)
 plt.title("Elastic Photon-Photon Luminosity Spectrum at LHeC", fontsize=20)
+
 plt.grid(True, which="both", linestyle="--")
-plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
+plt.legend(title=r'$Q^2_{e,\text{max}} = 100 \, \mathrm{GeV}^2, \, Q^2_{p,\text{max}} = 100 \, \mathrm{GeV}^2$', fontsize=14)
 
 
-plt.savefig("elastic_photon_luminosity_spectrum.pdf")
-plt.savefig("elastic_photon_luminosity_spectrum.jpg")
 
+# Save the plot as a PDF and JPG
+plt.savefig("elastic_photon_luminosity_spectrum_with_W10.pdf")
+plt.savefig("elastic_photon_luminosity_spectrum_with_W10.jpg")
 
 plt.show()
-
