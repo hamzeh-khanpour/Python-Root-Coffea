@@ -24,16 +24,35 @@ def G_M(Q2):
 def qmin2(mass, y):
     return mass * mass * y * y / (1 - y)
 
-# Elastic Photon Flux from Electron
+
+
+# Elastic Photon Flux from Electron (with full Q2 integration using lnQ2 change of variable)
 def flux_y_electron(ye, qmax2):
     if ye <= 0 or ye >= 1:
         return 0.0
     qmin2v = qmin2(emass, ye)
-    y1 = 0.5 * (1.0 + (1.0 - ye) ** 2) / ye
-    y2 = (1.0 - ye) / ye
-    flux1 = y1 * math.log(qmax2 / qmin2v)
-    flux2 = y2 * (1.0 - qmin2v / qmax2)
-    return ALPHA2PI * (flux1 - flux2)
+
+    # Integration over ln(Q2) from ln(qmin2) to ln(qmax2)
+    def integrand(lnQ2):
+        Q2 = np.exp(lnQ2)
+        y1 = 0.5 * (1.0 + (1.0 - ye) ** 2) / ye
+        y2 = (1.0 - ye) / ye
+        flux1 = y1 / Q2
+        flux2 = y2 / qmax2
+        return (flux1 - flux2) * Q2  # Multiply by Q2 to account for change of variable
+
+    try:
+        result, _ = integrate.quad(integrand, math.log(qmin2v), math.log(qmax2), epsrel=1e-4)
+    except integrate.IntegrationWarning:
+        print(f"Warning: Integration for electron flux did not converge for ye={ye}")
+        result = 0.0
+    except Exception as e:
+        print(f"Error during integration for electron flux: {e}")
+        result = 0.0
+
+    return ALPHA2PI * result
+    
+
 
 # Elastic Photon Flux from Proton
 def flux_y_proton(yp, qmax2):

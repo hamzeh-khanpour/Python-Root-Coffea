@@ -11,7 +11,7 @@ emass = 5.1099895e-4   # Electron mass
 pmass = 0.938272081    # Proton mass
 mtau = 1.77686  # Tau mass in GeV
 q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
+q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
 
 # Elastic Form Factors (Dipole Approximation)
 def G_E(Q2):
