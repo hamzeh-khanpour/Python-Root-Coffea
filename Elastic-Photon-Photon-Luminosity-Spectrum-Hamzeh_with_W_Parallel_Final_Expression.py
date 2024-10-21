@@ -1,10 +1,12 @@
 # Elastic Photon-Photon Luminosity Spectrum at LHeC --- Updated Version with Parallel Computing
 
+
 import numpy as np
 import math
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
+
 
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
@@ -13,6 +15,7 @@ pmass = 0.938272081    # Proton mass
 
 q2emax = 100.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
 q2pmax = 100.0  # Maximum photon virtuality for proton in GeV^2 (matching your settings)
+
 
 # Elastic Form Factors (Dipole Approximation)
 def G_E(Q2):
@@ -24,6 +27,8 @@ def G_M(Q2):
 # Minimum Photon Virtuality
 def qmin2(mass, y):
     return (mass * y)**2 / (1 - y)
+
+
 
 # Photon Flux from Electron
 def flux_y_electron(ye, Q2e):
@@ -37,6 +42,8 @@ def flux_y_electron(ye, Q2e):
         (1 - ye) * (1 - qmin2v / Q2e) + 0.5 * ye**2
     )
     return flux
+
+
 
 # Photon Flux from Proton
 def flux_y_proton(yp, Q2p):
@@ -69,14 +76,17 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
         yp_min = W**2 / (ye * s_cms)
         yp_max = 1.0
 
+
         def yp_integrand(yp):
             Q2e_min = 0.0
             Q2e_max = ye * yp * s_cms - W**2
+
 
             def Q2e_integrand(Q2e):
                 Q2p = ye * yp * s_cms - W**2 - Q2e
                 if Q2p < 0.0 or Q2p > q2pmax:
                     return 0.0
+
 
                 # Calculate photon fluxes
                 flux_e = flux_y_electron(ye, Q2e)
@@ -87,8 +97,10 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
             result_Q2e, _ = integrate.quad(Q2e_integrand, Q2e_min, Q2e_max, epsrel=1e-4)
             return result_Q2e
 
+
         result_yp, _ = integrate.quad(yp_integrand, yp_min, yp_max, epsrel=1e-4)
         return result_yp
+
 
     result_ye, _ = integrate.quad(integrand, ye_min, 1.0, epsrel=1e-4)
     return result_ye
@@ -103,14 +115,17 @@ pEbeam = 7000.0  # Proton beam energy in GeV
 
 W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
 
+
 # Wrapper function for parallel processing
 def wrapper_flux_el_yy_atW(W):
     return flux_el_yy_atW(W, eEbeam, pEbeam)
+
 
 # Parallel Calculation of the Elastic Photon-Photon Luminosity Spectrum
 if __name__ == "__main__":
     with Pool() as pool:
         luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
+
 
     # Calculate the Elastic Photon-Photon Luminosity Spectrum at W = 10 GeV
     W_value = 10.0  # GeV
@@ -124,14 +139,17 @@ if __name__ == "__main__":
 
     plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic')
 
+
     # Marking W_0 = 10 GeV on the plot
     plt.scatter(W_value, luminosity_at_W10, color='red', zorder=5)
     plt.text(W_value, luminosity_at_W10 * 1.5, f'$W_0 = 10$ GeV\n$S_{{\gamma\gamma}} = {luminosity_at_W10:.2e}$', color='red', fontsize=10, ha='center')
+
 
     # Plot settings
     plt.xlabel(r"$W$ [GeV]", fontsize=18)
     plt.ylabel(r"$S_{\gamma\gamma}$ [GeV$^{-1}$]", fontsize=18)
     plt.title("Elastic Photon-Photon Luminosity Spectrum at LHeC", fontsize=20)
+
 
     plt.grid(True, which="both", linestyle="--")
     plt.legend(title=r'$Q^2_{e,\text{max}} = 100 \, \mathrm{GeV}^2, \, Q^2_{p,\text{max}} = 100 \, \mathrm{GeV}^2$', fontsize=14)
