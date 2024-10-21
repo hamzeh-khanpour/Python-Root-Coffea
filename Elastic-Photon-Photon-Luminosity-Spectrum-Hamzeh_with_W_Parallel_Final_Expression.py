@@ -84,7 +84,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
                 return 0.0
 
             def Q2e_integrand(Q2e):
-                Q2p = ye * yp * s_cms - W**2 - Q2e
+                Q2p = ye * yp * s_cms - W**2 - Q2e 
                 Q2p_min = qmin2(pmass, yp)
 
                 if Q2p < Q2p_min or Q2p > q2pmax:
