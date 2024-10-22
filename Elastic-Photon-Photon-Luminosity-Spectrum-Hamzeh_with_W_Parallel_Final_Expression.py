@@ -1,10 +1,12 @@
 # Elastic Photon-Photon Luminosity Spectrum at LHeC --- Updated Version with Parallel Computing
 
+
 import numpy as np
 import math
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
+
 
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
@@ -13,6 +15,7 @@ pmass = 0.938272081    # Proton mass
 
 q2emax = 100.0  # Maximum photon virtuality for electron in GeV^2
 q2pmax = 100.0  # Maximum photon virtuality for proton in GeV^2
+
 
 
 # Elastic Form Factors (Dipole Approximation)
@@ -71,12 +74,14 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
 
     # Integration over ye from ye_min to ye_max (which is 1)
     ye_min = W**2 / s_cms
+#    ye_max = 1.0
 
     def integrand(ye):
         yp_min = W**2 / (ye * s_cms)
         yp_max = 1.0
 
         def yp_integrand(yp):
+            # Update Q2e_min and Q2e_max using physical limits
             Q2e_min = qmin2(emass, ye)
             Q2e_max = min(q2emax, ye * yp * s_cms - W**2)
 
@@ -84,7 +89,8 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
                 return 0.0
 
             def Q2e_integrand(Q2e):
-                Q2p = ye * yp * s_cms - W**2 - Q2e 
+                # Calculate Q2p value from kinematics
+                Q2p = ye * yp * s_cms - W**2 - Q2e
                 Q2p_min = qmin2(pmass, yp)
 
                 if Q2p < Q2p_min or Q2p > q2pmax:
@@ -107,12 +113,12 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
 
 
 
+
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
 
 W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
-
 
 # Wrapper function for parallel processing
 def wrapper_flux_el_yy_atW(W):
@@ -135,7 +141,6 @@ if __name__ == "__main__":
     plt.xlim(10.0, 1000.0)
     plt.ylim(1.e-7, 1.e-1)
 
-
     plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic')
 
 
@@ -148,7 +153,6 @@ if __name__ == "__main__":
     plt.xlabel(r"$W$ [GeV]", fontsize=18)
     plt.ylabel(r"$S_{\gamma\gamma}$ [GeV$^{-1}$]", fontsize=18)
     plt.title("Elastic Photon-Photon Luminosity Spectrum at LHeC", fontsize=20)
-
 
     plt.grid(True, which="both", linestyle="--")
     plt.legend(title=r'$Q^2_{e,\text{max}} = 100 \, \mathrm{GeV}^2, \, Q^2_{p,\text{max}} = 100 \, \mathrm{GeV}^2$', fontsize=14)
