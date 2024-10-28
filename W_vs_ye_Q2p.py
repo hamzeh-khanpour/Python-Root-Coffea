@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 # Given constants
 E_e = 50  # GeV
 E_p = 7000  # GeV
-y_p = 0.001
+y_p = 0.01
 Q_p2 = 100  # GeV^2, as specified in the instructions
 
 y_e_values = [0.0001, 0.001, 0.01, 0.1, 0.5, 0.9]
@@ -17,11 +17,11 @@ line_styles = ['solid', 'dashed', 'dotted', 'dashdot', (0, (3, 1, 1, 1)),
 
 # Function to calculate W^2 according to the provided formula
 def calculate_W2(Q_e2, y_e, E_e, E_p, y_p, Q_p2):
-    term1 = -Q_e2
-    term2 = -Q_p2
-    term3 = 2 * (y_e * E_e * y_p * E_p)
+    term1 = -  Q_e2
+    term2 = -  Q_p2
+    term3 = 4 * (y_e * E_e * y_p * E_p)
     term4 = 2 * np.sqrt(y_e**2 * E_e**2 + Q_e2) * np.sqrt(y_p**2 * E_p**2 + Q_p2)
-    return term1 + term2 + term3 - term4
+    return term1 + term2 + term3 
 
 # Prepare to save W^2 values to a text file
 output_data = []
@@ -51,8 +51,8 @@ plt.title(r'$W^2$ as a function of $Q_e^2$ for different $y_e$ values')
 plt.text(0.3, 0.9, f'$E_e$ = {E_e} GeV\n$E_p$ = {E_p} GeV\n$y_p$ = {y_p}\n$Q_p^2$ = {Q_p2} GeV$^2$', 
          transform=plt.gca().transAxes, fontsize=12, color='blue', ha='left', va='center')
 
-#plt.xscale('log')
-#plt.yscale('log')
+plt.xscale('log')
+plt.yscale('log')
 
 plt.ylim(1, 1000000)
 
