@@ -1,4 +1,5 @@
-# Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2
+# Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2_Jacobian
+
 
 import numpy as np
 import math
@@ -13,9 +14,8 @@ emass = 5.1099895e-4   # Electron mass in GeV
 pmass = 0.938272081    # Proton mass in GeV
 
 
-q2emax = 10.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
-
+q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
 
 # Elastic Form Factors (Dipole Approximation)
 def G_E(Q2):
@@ -33,12 +33,20 @@ def qmin2(mass, y):
     return mass * mass * y * y / (1 - y)
 
 
-# Function to compute W^2 using Equation (C.4)
-def compute_W2(ye, yp, Q2e, Ee, Ep):
-    term1 = -Q2e
-    term2 = 2 * ye * yp * Ee * Ep
-    term3 = 2 * yp * Ep * np.sqrt((ye * Ee)**2 + Q2e) * (1 - Q2e / (2 * Ee**2 * (1 - ye)))
-    return term1 + term2 + term3
+# Function to compute the Jacobian (partial derivative of f with respect to y_p)
+def compute_jacobian(ye, yp, Q2e, Ee, Ep):
+    # Calculate the inner term g(y_e, y_p, Q2_e)
+    g = (-Q2e + 2 * ye * yp * Ee * Ep 
+         + 2 * yp * Ep * np.sqrt((ye * Ee) ** 2 + Q2e) * (1 - Q2e / (2 * Ee ** 2 * (1 - ye))))
+    
+    # Partial derivative of g with respect to y_p
+    partial_g = (2 * ye * Ee * Ep 
+                 + 2 * Ep * np.sqrt((ye * Ee) ** 2 + Q2e) * (1 - Q2e / (2 * Ee ** 2 * (1 - ye))))
+    
+    # Calculate the Jacobian
+    jacobian = abs(partial_g / (2 * np.sqrt(g)))
+    
+    return jacobian
 
 
 # Function to compute y_p using Equation (C.5)
@@ -49,6 +57,7 @@ def compute_yp(W, Q2e, ye, Ee, Ep):
         return 0
     yp = numerator / denominator
     return yp
+
 
 
 # Photon Flux from Electron (using lnQ2 as the integration variable)
@@ -64,26 +73,11 @@ def flux_y_electron(ye, lnQ2e):
     return flux * Q2e  # Multiply by Q2e to account for dQ^2 = Q^2 d(lnQ^2)
 
 
+
 # Photon Flux from Proton (using lnQ2 as the integration variable)
-def flux_y_proton(yp, lnQ2p):
-    Q2p = np.exp(lnQ2p)
+def flux_y_proton(yp):
     if yp <= 0 or yp >= 1:
         return 0.0
-    qmin2v = qmin2(pmass, yp)
-    if qmin2v <= 0 or Q2p < qmin2v or Q2p > q2pmax:
-        return 0.0
-
-    gE2 = G_E(Q2p)
-    gM2 = G_M(Q2p)
-    formE = (4 * pmass**2 * gE2 + Q2p * gM2) / (4 * pmass**2 + Q2p)
-    formM = gM2
-
-    flux = ALPHA2PI / (yp * Q2p) * ((1 - yp) * (1 - qmin2v / Q2p) * formE + 0.5 * yp**2 * formM)
-    return flux * Q2p  # Multiply by Q2p to account for dQ^2 = Q^2 d(lnQ^2)
-
-
-# Integration over lnQ2_p for the Proton Flux (Independent Calculation)
-def integrate_proton_flux(yp):
     qmin2p = qmin2(pmass, yp)
     if qmin2p <= 0:
         return 0.0
@@ -92,18 +86,27 @@ def integrate_proton_flux(yp):
     lnQ2p_max = math.log(q2pmax)
 
     def lnQ2p_integrand(lnQ2p):
-        return flux_y_proton(yp, lnQ2p)
+        Q2p = np.exp(lnQ2p)
+        if Q2p < qmin2p or Q2p > q2pmax:
+            return 0.0
+        gE2 = G_E(Q2p)
+        gM2 = G_M(Q2p)
+        formE = (4 * pmass**2 * gE2 + Q2p * gM2) / (4 * pmass**2 + Q2p)
+        formM = gM2
+        flux = ALPHA2PI / (yp * Q2p) * ((1 - yp) * (1 - qmin2p / Q2p) * formE + 0.5 * yp**2 * formM)
+        return flux * Q2p  # Multiply by Q2p to account for dQ^2 = Q^2 d(lnQ^2)
 
     result_lnQ2p, _ = integrate.quad(lnQ2p_integrand, lnQ2p_min, lnQ2p_max, epsrel=1e-4)
     return result_lnQ2p
 
 
-# Photon-Photon Luminosity Spectrum Calculation (Modified for Eq. C.10)
+
+# Photon-Photon Luminosity Spectrum Calculation (Final Form using the Jacobian)
 def flux_el_yy_atW(W, eEbeam, pEbeam):
     s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
 
     # Integration over ye from ye_min to ye_max (which is 1)
-    ye_min = 0.0   # W**2.0 / s_cms
+    ye_min = W**2.0 / s_cms
     ye_max = 1.0
 
     def integrand(ye):
@@ -120,16 +123,21 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
             # Calculate y_p using Equation (C.5)
             yp_value = compute_yp(W, Q2e, ye, eEbeam, pEbeam)
 
-            # Calculate W^2 using Equation (C.4)
-            W2_value = compute_W2(ye, yp_value, Q2e, eEbeam, pEbeam)
-            if W2_value <= 0:
+            if yp_value <= 0 or yp_value >= 1:
                 return 0.0
 
-            # Integrate over lnQ2p for the proton flux
-            proton_flux = integrate_proton_flux(yp_value)
+            # Calculate the Jacobian
+            jacobian = compute_jacobian(ye, yp_value, Q2e, eEbeam, pEbeam)
+            if jacobian == 0:
+                return 0.0
 
+            # Calculate the photon flux from the proton at y_p = y_p*
+            proton_flux = flux_y_proton(yp_value)
+
+            # Calculate the photon flux from the electron
             flux_e = flux_y_electron(ye, lnQ2e)
-            return flux_e * proton_flux
+
+            return flux_e * proton_flux / jacobian
 
         result_lnQ2e, _ = integrate.quad(lnQ2e_integrand, lnQ2e_min, lnQ2e_max, epsrel=1e-4)
         return result_lnQ2e
@@ -138,10 +146,12 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
     return result_ye
 
 
+
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
 W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
+
 
 
 # Wrapper function for parallel processing
@@ -149,10 +159,12 @@ def wrapper_flux_el_yy_atW(W):
     return flux_el_yy_atW(W, eEbeam, pEbeam)
 
 
+
 # Parallel Calculation of the Photon-Photon Luminosity Spectrum
 if __name__ == "__main__":
     with Pool() as pool:
         luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
+
 
     W_value = 10.0  # GeV
     luminosity_at_W10 = flux_el_yy_atW(W_value, eEbeam, pEbeam)
@@ -167,22 +179,30 @@ if __name__ == "__main__":
 
     plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic')
 
+
     # Marking W_0 = 10 GeV on the plot
-    plt.scatter(W_value, luminosity_at_W10, color='red', zorder=5)
-    plt.text(W_value, luminosity_at_W10 * 1.5, f'$W_0 = 10$ GeV\n$S_{{\gamma\gamma}} = {luminosity_at_W10:.2e}$', color='red', fontsize=10, ha='center')
+    #plt.scatter(W_value, luminosity_at_W10, color='red', zorder=5)
+    #plt.text(W_value, luminosity_at_W10 * 1.5, f'$W_0 = 10$ GeV\n$S_{{\gamma\gamma}} = {luminosity_at_W10:.2e}$', color='red', fontsize=10, ha='center')
+
+
+    # Add additional information to the plot
+    plt.text(15, 5.e-6, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
+    plt.text(15, 2.e-6, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
+    plt.text(15, 1.e-6, f'Luminosity at W={W_value} GeV = {luminosity_at_W10:.2e} GeV^-1', fontsize=14, color='blue')
+
 
 
     # Plot settings
     plt.xlabel(r"$W$ [GeV]", fontsize=18)
     plt.ylabel(r"$S_{\gamma\gamma}$ [GeV$^{-1}$]", fontsize=18)
-    plt.title("Elastic Photon-Photon Luminosity Spectrum at LHeC", fontsize=20)
+    plt.title("Elastic Syy at LHeC with Correct W", fontsize=20)
     plt.grid(True, which="both", linestyle="--")
-    plt.legend(title=r'$Q^2_{e,\text{max}} = 1 \, \mathrm{GeV}^2, \, Q^2_{p,\text{max}} = 1 \, \mathrm{GeV}^2$', fontsize=14)
+    plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
 
 
     # Save the plot as a PDF and JPG
-    plt.savefig("Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2.pdf")
-    plt.savefig("Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2.jpg")
+    plt.savefig("Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2_Jacobian.pdf")
+    plt.savefig("Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2_Jacobian.jpg")
     plt.show()
-    
+
 
