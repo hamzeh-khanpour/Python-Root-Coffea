@@ -193,6 +193,16 @@ if __name__ == "__main__":
         luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
 
 
+
+
+    # Save results to a text file
+    with open("Jacobian_Hamzeh.txt", "w") as file:
+        file.write("# W [GeV]    S_yy [GeV^-1]\n")
+        for W, S_yy in zip(W_values, luminosity_values):
+            file.write(f"{W:.6e}    {S_yy:.6e}\n")
+
+
+
     W_value = 10.0  # GeV
     luminosity_at_W10 = flux_el_yy_atW(W_value, eEbeam, pEbeam)
     print(f"Photon-Photon Luminosity Spectrum at W = {W_value} GeV: {luminosity_at_W10:.6e} GeV^-1")

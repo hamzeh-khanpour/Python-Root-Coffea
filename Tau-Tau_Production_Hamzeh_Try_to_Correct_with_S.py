@@ -10,8 +10,8 @@ ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4   # Electron mass
 pmass = 0.938272081    # Proton mass
 mtau = 1.77686  # Tau mass in GeV
-q2emax = 100.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
-q2pmax = 100.0  # Maximum photon virtuality for proton in GeV^2 (matching your settings)
+q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2 (matching your settings)
+q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2 (matching your settings)
 
 # Elastic Form Factors (Dipole Approximation)
 def G_E(Q2):
@@ -172,6 +172,15 @@ print(f"Elastic Photon-Photon Luminosity Spectrum at W = {W_value} GeV: {luminos
 
 # Calculate the Elastic Photon-Photon Luminosity Spectrum
 luminosity_values = [flux_el_yy_atW(W, eEbeam, pEbeam, q2emax, q2pmax) for W in W_values]
+
+
+    # Save results to a text file
+with open("With_Suppresion_Factor.txt", "w") as file:
+        file.write("# W [GeV]    S_yy [GeV^-1]\n")
+        for W, S_yy in zip(W_values, luminosity_values):
+            file.write(f"{W:.6e}    {S_yy:.6e}\n")
+
+
 
 # Calculate Integrated Tau-Tau Production Cross-Section at W_0 = 10 GeV
 W0_value = 10.0  # GeV

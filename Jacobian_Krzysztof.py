@@ -13,8 +13,8 @@ emass = 5.1099895e-4   # Electron mass in GeV
 pmass = 0.938272081    # Proton mass in GeV
 
 
-q2emax = 10.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
+q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
 
 # Elastic Form Factors (Dipole Approximation)
 def G_E(Q2):
@@ -163,6 +163,16 @@ def wrapper_flux_el_yy_atW(W):
 if __name__ == "__main__":
     with Pool() as pool:
         luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
+
+
+
+
+    # Save results to a text file
+    with open("Jacobian_Krzysztof.txt", "w") as file:
+        file.write("# W [GeV]    S_yy [GeV^-1]\n")
+        for W, S_yy in zip(W_values, luminosity_values):
+            file.write(f"{W:.6e}    {S_yy:.6e}\n")
+
 
 
     W_value = 10.0  # GeV
