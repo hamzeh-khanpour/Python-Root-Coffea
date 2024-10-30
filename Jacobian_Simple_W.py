@@ -1,6 +1,5 @@
 # Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2_Jacobian
 
-
 import numpy as np
 import math
 import scipy.integrate as integrate
@@ -14,8 +13,8 @@ emass = 5.1099895e-4   # Electron mass in GeV
 pmass = 0.938272081    # Proton mass in GeV
 
 
-q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
+q2emax = 10.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
 
 # Elastic Form Factors (Dipole Approximation)
 def G_E(Q2):
@@ -33,30 +32,34 @@ def qmin2(mass, y):
     return mass * mass * y * y / (1 - y)
 
 
-# Function to compute the Jacobian (partial derivative of f with respect to y_p)
-def compute_jacobian(ye, yp, Q2e, Ee, Ep):
-    # Calculate the inner term g(y_e, y_p, Q2_e)
-    g = (-Q2e + 2 * ye * yp * Ee * Ep 
-         + 2 * yp * Ep * np.sqrt((ye * Ee) ** 2 + Q2e) * (1 - Q2e / (2 * Ee ** 2 * (1 - ye))))
-    
-    # Partial derivative of g with respect to y_p
-    partial_g = (2 * ye * Ee * Ep 
-                 + 2 * Ep * np.sqrt((ye * Ee) ** 2 + Q2e) * (1 - Q2e / (2 * Ee ** 2 * (1 - ye))))
-    
-    # Calculate the Jacobian
-    jacobian = abs(partial_g / (2 * np.sqrt(g)))
-    
-    return jacobian
 
-
-# Function to compute y_p using Equation (C.5)
-def compute_yp(W, Q2e, ye, Ee, Ep):
-    numerator = W**2 + Q2e
-    denominator = 2 * ye * Ee * Ep + 2 * Ep * np.sqrt((ye * Ee)**2 + Q2e) * (1 - Q2e / (2 * Ee**2 * (1 - ye)))
+# Updated function to compute y_p using the new simplified W expression
+def compute_yp(W, ye, Ee, Ep):
+    # Calculate the numerator and denominator for y_p
+    numerator = W**2
+    denominator = 4 * ye * Ee * Ep
+    
     if denominator == 0:
         return 0
     yp = numerator / denominator
     return yp
+
+import numpy as np
+
+
+
+# Updated function to compute the Jacobian (partial derivative of W with respect to y_p)
+def compute_jacobian(ye, yp, Ee, Ep):
+    # Calculate the Jacobian using W = sqrt(4 * ye * yp * Ee * Ep)
+    numerator = 2 * ye * Ee * Ep
+    denominator = np.sqrt(4 * ye * yp * Ee * Ep)
+    
+    if denominator == 0:
+        return 0  # Avoid division by zero
+    
+    # Calculate the Jacobian as the absolute value of dW/dyp
+    jacobian = np.abs(numerator / denominator)
+    return jacobian
 
 
 
@@ -121,13 +124,13 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
         def lnQ2e_integrand(lnQ2e):
             Q2e = np.exp(lnQ2e)
             # Calculate y_p using Equation (C.5)
-            yp_value = compute_yp(W, Q2e, ye, eEbeam, pEbeam)
+            yp_value = compute_yp(W, ye, eEbeam, pEbeam)
 
             if yp_value <= 0 or yp_value >= 1:
                 return 0.0
 
             # Calculate the Jacobian
-            jacobian = compute_jacobian(ye, yp_value, Q2e, eEbeam, pEbeam)
+            jacobian = compute_jacobian(ye, yp_value, eEbeam, pEbeam)
             if jacobian == 0:
                 return 0.0
 
@@ -180,11 +183,6 @@ if __name__ == "__main__":
     plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic')
 
 
-    # Marking W_0 = 10 GeV on the plot
-    #plt.scatter(W_value, luminosity_at_W10, color='red', zorder=5)
-    #plt.text(W_value, luminosity_at_W10 * 1.5, f'$W_0 = 10$ GeV\n$S_{{\gamma\gamma}} = {luminosity_at_W10:.2e}$', color='red', fontsize=10, ha='center')
-
-
     # Add additional information to the plot
     plt.text(15, 5.e-6, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
     plt.text(15, 2.e-6, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
@@ -201,8 +199,8 @@ if __name__ == "__main__":
 
 
     # Save the plot as a PDF and JPG
-    plt.savefig("Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2_Jacobian.pdf")
-    plt.savefig("Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2_Jacobian.jpg")
+    plt.savefig("Jacobian_Simple_W.pdf")
+    plt.savefig("Jacobian_Simple_W.jpg")
     plt.show()
 
 
