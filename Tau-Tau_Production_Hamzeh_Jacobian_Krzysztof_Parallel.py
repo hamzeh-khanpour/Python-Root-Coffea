@@ -207,7 +207,7 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 
 if __name__ == "__main__":
 
-    num_cores = 100  # Set this to the number of cores you want to use
+    num_cores = 10  # Set this to the number of cores you want to use
 
 
     # Parameters
