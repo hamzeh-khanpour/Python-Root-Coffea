@@ -1,5 +1,5 @@
 
-# Integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel Hamzeh Khanpour 2024
+# Integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel   Hamzeh Khanpour 2024
 
 ################################################################################
 
@@ -20,8 +20,8 @@ pmass = 0.938272081    # Proton mass in GeV
 
 
 
-q2emax = 50.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 50.0  # Maximum photon virtuality for proton in GeV^2
+q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
 
 
 
@@ -298,3 +298,6 @@ if __name__ == "__main__":
     
     
 ################################################################################
+
+
+
