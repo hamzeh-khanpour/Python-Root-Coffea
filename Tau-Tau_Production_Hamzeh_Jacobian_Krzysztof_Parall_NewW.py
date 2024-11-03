@@ -20,8 +20,8 @@ pmass = 0.938272081    # Proton mass in GeV
 
 
 
-q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
+q2emax = 1.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 1.0  # Maximum photon virtuality for proton in GeV^2
 
 
 
@@ -46,11 +46,11 @@ def qmin2(mass, y):
 
 
 
-
-# Function to compute y_p using Equation (C.5)
+# Function to compute y_p using new W: W = sqrt(-Q_e^2 + y_e y_p s)
 def compute_yp(W, Q2e, ye, Ee, Ep):
+    s = 4 * Ee * Ep  # Center-of-mass energy squared
     numerator = W**2 + Q2e
-    denominator = 4 * ye * Ee * Ep # + 2 * Ep * np.sqrt((ye * Ee)**2 + Q2e) * (1 - Q2e / (2 * Ee**2 * (1 - ye)))
+    denominator = ye * s
     if denominator == 0:
         return 0
     yp = numerator / denominator
@@ -58,20 +58,13 @@ def compute_yp(W, Q2e, ye, Ee, Ep):
 
 
 
-
-# Function to compute the Jacobian (partial derivative of f with respect to y_p)
+# Function to compute the Jacobian (partial derivative of W with respect to y_p)
 def compute_jacobian(ye, yp, Q2e, Ee, Ep):
-    # Calculate the inner term g(y_e, y_p, Q2_e)
-    g = (-Q2e + 2 * ye * yp * Ee * Ep 
-         + 2 * yp * Ep * np.sqrt((ye * Ee) ** 2 + Q2e) * (1 - Q2e / (2 * Ee ** 2 * (1 - ye))))
-    
-    # Partial derivative of g with respect to y_p
-    partial_g = (2 * ye * Ee * Ep 
-                 + 2 * Ep * np.sqrt((ye * Ee) ** 2 + Q2e) * (1 - Q2e / (2 * Ee ** 2 * (1 - ye))))
-    
-    # Calculate the Jacobian
-    jacobian = abs(partial_g / (2 * np.sqrt(g)))
-    
+    s = 4 * Ee * Ep  # Center-of-mass energy squared
+    W = np.sqrt(-Q2e + ye * yp * s)  # Updated W using new W formula
+    if W == 0:
+        return 0
+    jacobian = abs(ye * s / (2 * W))
     return jacobian
 
 
@@ -207,7 +200,7 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 
 if __name__ == "__main__":
 
-    num_cores = 10  # Set this to the number of cores you want to use
+    num_cores = 100  # Set this to the number of cores you want to use
 
 
     # Parameters
@@ -259,8 +252,8 @@ if __name__ == "__main__":
     plt.grid(True, which="both", linestyle="--")
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
 
-    plt.savefig("Jacobian_Krzysztof_Parallel.pdf")
-    plt.savefig("Jacobian_Krzysztof_Parallel.jpg")
+    plt.savefig("Jacobian_Krzysztof_Parallel_NewW.pdf")
+    plt.savefig("Jacobian_Krzysztof_Parallel_NewW.jpg")
     
     plt.show()
 
@@ -291,8 +284,8 @@ if __name__ == "__main__":
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
 
 
-    plt.savefig("integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel.pdf")
-    plt.savefig("integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel.jpg")
+    plt.savefig("integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel_NewW.pdf")
+    plt.savefig("integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel_NewW.jpg")
     
     plt.show()
     
