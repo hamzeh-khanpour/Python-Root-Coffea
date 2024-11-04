@@ -131,15 +131,14 @@ def qmin2_proton(MN, y):
     return ((MN**2) / (1 - y) - pmass**2) * y
 
 
-# Function to compute y_p using given equation (F.18)
-def compute_yp(W, Q2e, Q2p, ye, Ee, Ep, MN):
-    numerator = W**2 + Q2e + Q2p - (Q2e * (Q2p + MN**2 - pmass**2)) / (4 * Ee * Ep)
+# Function to compute y_p using the new equation based on W^2 = -Q_e^2 - Q_p^2 + y_e y_p 4 E_e E_p
+def compute_yp(W, Q2e, Q2p, ye, Ee, Ep):
+    numerator = W**2 + Q2e + Q2p
     denominator = ye * 4 * Ee * Ep
     yp_value = numerator / denominator
     return yp_value
 
-
-# Function to compute the Jacobian with respect to y_p
+# Function to compute the Jacobian with respect to y_p using the updated W equation
 def compute_jacobian(ye, Ee, Ep, W):
     jacobian = abs(2 * ye * Ee * Ep / W)
     return jacobian
@@ -219,7 +218,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
                 def lnQ2p_integrand(lnQ2p):
                     Q2p = np.exp(lnQ2p)
                     # Calculate y_p using Equation (F.18) dynamically based on current Q2p
-                    yp_value = compute_yp(W, Q2e, Q2p, ye, eEbeam, pEbeam, MN)
+                    yp_value = compute_yp(W, Q2e, Q2p, ye, eEbeam, pEbeam)
 
                     # Check if the computed yp is valid
                     if yp_value <= 0 or yp_value >= 1:
@@ -265,7 +264,7 @@ if __name__ == "__main__":
         luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
 
     # Save results to a text file
-    with open("Jacobian_Krzysztof_Inelastic_Updated.txt", "w") as file:
+    with open("Jacobian_Krzysztof_Inelastic_Updated_noMN.txt", "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
         for W, S_yy in zip(W_values, luminosity_values):
             file.write(f"{W:.6e}    {S_yy:.6e}\n")
@@ -294,6 +293,9 @@ if __name__ == "__main__":
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
 
     # Save the plot as a PDF and JPG
-    plt.savefig("Jacobian_Krzysztof_Inelastic_Updated.pdf")
-    plt.savefig("Jacobian_Krzysztof_Inelastic_Updated.jpg")
+    plt.savefig("Jacobian_Krzysztof_Inelastic_Updated_noMN.pdf")
+    plt.savefig("Jacobian_Krzysztof_Inelastic_Updated_noMN.jpg")
+
     plt.show()
+
+    
