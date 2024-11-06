@@ -1,96 +1,212 @@
+# Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2_Jacobian
+
 import numpy as np
+import math
+import scipy.integrate as integrate
 import matplotlib.pyplot as plt
-from scipy.integrate import quad
+from multiprocessing import Pool
 
-# Constants
-alpha = 1 / 137  # Fine-structure constant
-M_p = 0.938  # Proton mass in GeV
-mu_p = 2.7927  # Proton magnetic moment
-m_pi0 = 0.135  # Neutral pion mass in GeV
-m_e = 0.000511  # Electron mass in GeV
-E_electron = 50  # Electron beam energy at the LHeC in GeV
-E_proton = 7000  # Proton beam energy in GeV
-s_ep = 4 * E_electron * E_proton  # CM energy squared of the ep system
+# Constants in GeV
+ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
+emass = 5.1099895e-4   # Electron mass in GeV
+pmass = 0.938272081    # Proton mass in GeV
+pi0mass = 0.1349768    # Pion mass in GeV
 
-# Proton form factors for elastic scattering (dipole approximation)
-def G_E(Q2):
-    return (1 + Q2 / 0.71)**(-2)
+q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
+MN_max = 10.0  # Maximum MN in GeV
 
-def G_M(Q2):
-    return mu_p * G_E(Q2)
+# Parameters for the ALLM structure function model
+Mass2_0 = 0.31985
+Mass2_P = 49.457
+Mass2_R = 0.15052
+Q2_0 = 0.52544
+Lambda2 = 0.06527
 
-# Small cutoff to avoid division by zero
-epsilon = 1e-8
+Ccp = (0.28067, 0.22291, 2.1979)
+Cap = (-0.0808, -0.44812, 1.1709)
+Cbp = (0.36292, 1.8917, 1.8439)
+Ccr = (0.80107, 0.97307, 3.4942)
+Car = (0.58400, 0.37888, 2.6063)
+Cbr = (0.01147, 3.7582, 0.49338)
 
-# Electron Q2_min based on y_e and electron mass
-def Q2_min_electron(y_e):
-    if y_e >= 1 - epsilon:
-        y_e = 1 - epsilon
-    return (m_e**2 * y_e**2) / (1 - y_e)
+def tvalue(Q2):
+    """Compute t-value for the ALLM model."""
+    return math.log(math.log((Q2 + Q2_0) / Lambda2) / math.log(Q2_0 / Lambda2))
 
-# Proton Q2_min based on y_p and masses of proton and pion
-def Q2_min_proton(y_p):
-    if y_p >= 1 - epsilon:
-        y_p = 1 - epsilon
-    mMin2 = (M_p + m_pi0)**2
-    return max(0, (mMin2 / (1 - y_p)) - M_p**2)
+def xP(xbj, Q2):
+    """Calculate xP for the ALLM model."""
+    if xbj == 0:
+        return -1.0
+    xPinv = 1.0 + Q2 / (Q2 + Mass2_P) * (1.0 / xbj - 1.0)
+    return 1.0 / xPinv
 
-# Elastic photon flux for the proton (unchanged)
-def phi_p(y, Q2_min, Q2_max):
-    def integrand(Q2):
-        return (G_E(Q2)**2 + (Q2 / (4 * M_p**2)) * G_M(Q2)**2) / Q2
-    flux, _ = quad(integrand, Q2_min, Q2_max, limit=1000)
-    return (alpha / np.pi) * flux / y
+def xR(xbj, Q2):
+    """Calculate xR for the ALLM model."""
+    if xbj == 0:
+        return -1.0
+    xPinv = 1.0 + Q2 / (Q2 + Mass2_R) * (1.0 / xbj - 1.0)
+    return 1.0 / xPinv
 
-# Photon flux for the electron (unchanged)
-def phi_e(y, Q2_min, Q2_max):
-    def integrand(Q2):
-        return ((1 - y) * (1 - Q2_min / Q2) + y**2 / 2) / Q2
-    if Q2_min >= Q2_max - epsilon:
-        return 0
-    flux, _ = quad(integrand, Q2_min, Q2_max, limit=10)
-    return (alpha / np.pi) * flux / y
+def type1(tval, tuple1):
+    return tuple1[0] + tuple1[1] * (tval ** tuple1[2])
 
-# Modified kinematics for W, including photon virtualities
-def modified_W(y_e, y_p, s_ep, Q2_e, Q2_p):
-    return np.sqrt(y_e * y_p * s_ep - Q2_e - Q2_p)
+def type2(tval, tuple1):
+    return tuple1[0] + (tuple1[0] - tuple1[1]) * (1.0 / (1.0 + tval ** tuple1[2]) - 1.0)
 
-# Luminosity spectrum calculation with modified W (elastic case)
-def S_gamma_gamma(W, s_ep, Q2_max_e=100, Q2_max_p=10):
-    luminosity = 0
-    y_e_min = W**2 / s_ep  # Minimum y for the electron
-    y_e_values = np.linspace(y_e_min, 1 - epsilon, 100000)
+def allm_f2(xbj, Q2):
+    """Calculate the ALLM structure function F2."""
+    tval = tvalue(Q2)
+    f2P = type2(tval, Ccp) * (xP(xbj, Q2) ** type2(tval, Cap)) * ((1.0 - xbj) ** type1(tval, Cbp))
+    f2R = type1(tval, Ccr) * (xR(xbj, Q2) ** type1(tval, Car)) * ((1.0 - xbj) ** type1(tval, Cbr))
+    return Q2 / (Q2 + Mass2_0) * (f2P + f2R)
 
-    for y_e in y_e_values:
-        y_p = W**2 / (y_e * s_ep)
+def qmin2_electron(mass, y):
+    if y >= 1:
+        return float('inf')  # Non-physical scenario
+    return mass * mass * y * y / (1 - y)
 
-        # Calculate Q2_min for electron and proton based on y
-        Q2_min_e = Q2_min_electron(y_e)
-        Q2_min_p = Q2_min_proton(y_p)
+def qmin2_proton(MN, y):
+    if y >= 1:
+        return float('inf')  # Non-physical scenario
+    return ((MN**2) / (1 - y) - pmass**2) * y
 
-        # Calculate modified W, including photon virtualities
-        W_mod = modified_W(y_e, y_p, s_ep, Q2_min_e, Q2_min_p)
+def compute_yp(W, Q2e, Q2p, ye, Ee, Ep):
+    numerator = W**2 + Q2e + Q2p
+    denominator = ye * 4 * Ee * Ep
+    return numerator / denominator
 
-        luminosity += phi_e(y_e, Q2_min_e, Q2_max_e) * phi_p(y_p, Q2_min_p, Q2_max_p) / y_e
+def compute_jacobian(ye, Ee, Ep, W):
+    return abs(2 * ye * Ee * Ep / W)
 
-    return 2 * W / s_ep * luminosity
+# Precompute MN-integrated flux_y_proton
+def precompute_flux_y_proton(lnQ2p, yp):
+    def proton_flux_integrand(MN):
+        Q2p = np.exp(lnQ2p)
+        xbj = Q2p / (MN**2 - pmass**2 + Q2p)
+        qmin2p = qmin2_proton(MN, yp)
 
-# Parameters for photon virtualities
-Q2_max_e = 100000  # Maximal photon virtuality for electron (GeV^2)
-Q2_max_p = 10  # Maximal photon virtuality for proton (GeV^2)
+        if yp <= 0 or yp >= 1 or qmin2p <= 0 or Q2p < qmin2p or Q2p > q2pmax:
+            return 0.0
 
-# Generate and plot the elastic photon-photon luminosity spectrum with modified W
-W_values = np.linspace(10, 1000, 100)  # Photon-photon CM energy in GeV
-luminosity_spectrum = [S_gamma_gamma(W, s_ep, Q2_max_e, Q2_max_p) for W in W_values]
+        # Calculate the structure function contributions
+        FE = allm_f2(xbj, Q2p) * (2 * MN / (MN**2 - pmass**2 + Q2p))
+        FM = allm_f2(xbj, Q2p) * (2 * MN * (MN**2 - pmass**2 + Q2p)) / (Q2p * Q2p)
 
-# Plotting the results
-plt.figure(figsize=(8, 6))
-plt.plot(W_values, luminosity_spectrum, label=r'Elastic Luminosity Spectrum with Modified W')
-plt.xscale('log')
-plt.yscale('log')
-plt.xlabel(r'Photon-Photon CM Energy $W_{\gamma\gamma}$ (GeV)')
-plt.ylabel(r'Luminosity Spectrum $S_{\gamma\gamma}(W)$')
-plt.title('Elastic Photon-Photon Luminosity Spectrum at the LHeC (Modified Kinematics)')
-plt.grid(True)
-plt.legend()
-plt.show()
+        # Photon flux contribution from proton
+        flux = ALPHA2PI / (yp * Q2p) * ((1 - yp) * (1 - qmin2p / Q2p) * FE + 0.5 * yp**2 * FM)
+        return flux * Q2p  # Multiply by Q2p to account for dQ^2 = Q^2 d(lnQ^2)
+
+    # Integrate over MN
+    MN_min = pmass + pi0mass
+    MN_max = 10.0
+    result_MN, _ = integrate.quad(proton_flux_integrand, MN_min, MN_max, epsrel=1e-3)
+    return result_MN
+
+
+
+
+def flux_y_electron(ye, lnQ2e):
+    Q2e = np.exp(lnQ2e)
+    qmin2v = qmin2_electron(emass, ye)
+
+    if ye <= 0 or ye >= 1 or qmin2v <= 0 or Q2e < qmin2v or Q2e > q2emax:
+        return 0.0
+
+    # Calculate electron flux
+    flux = ALPHA2PI / (ye * Q2e) * ((1 - ye) * (1 - qmin2v / Q2e) + 0.5 * ye**2)
+    return flux * Q2e
+
+
+def flux_el_yy_atW(W, eEbeam, pEbeam):
+    s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
+    ye_min = W**2.0 / s_cms
+    ye_max = 1.0
+
+    def integrand(ye):
+        qmin2e = qmin2_electron(emass, ye)
+        if qmin2e <= 0:
+            return 0.0
+
+        lnQ2e_min = math.log(qmin2e)
+        lnQ2e_max = math.log(q2emax)
+
+        def lnQ2e_integrand(lnQ2e):
+            Q2e = np.exp(lnQ2e)
+            jacobian = compute_jacobian(ye, eEbeam, pEbeam, W)
+            if jacobian == 0:
+                return 0.0
+
+            # Integration over Q2p using lnQ2p as the integration variable
+            def lnQ2p_integrand(lnQ2p):
+                Q2p = np.exp(lnQ2p)
+                yp_value = compute_yp(W, Q2e, Q2p, ye, eEbeam, pEbeam)
+
+                if yp_value <= 0 or yp_value >= 1:
+                    return 0.0
+
+                # Use precomputed proton flux with MN integration
+                proton_flux = precompute_flux_y_proton(lnQ2p, yp_value)
+                return proton_flux / jacobian
+
+            # Integrate over lnQ2p
+            result_lnQ2p, _ = integrate.quad(lnQ2p_integrand, math.log(q2pmax), math.log(q2pmax), epsrel=1e-4)
+            return result_lnQ2p * flux_y_electron(ye, lnQ2e)
+
+        # Integrate over lnQ2e
+        result_lnQ2e, _ = integrate.quad(lnQ2e_integrand, lnQ2e_min, lnQ2e_max, epsrel=1e-4)
+        return result_lnQ2e
+
+    # Integrate over ye
+    result_ye, _ = integrate.quad(integrand, ye_min, ye_max, epsrel=1e-4)
+    return result_ye
+
+# Parameters
+eEbeam = 50.0  # Electron beam energy in GeV
+pEbeam = 7000.0  # Proton beam energy in GeV
+W_values = np.logspace(1.0, 3.0, 101)
+
+def wrapper_flux_el_yy_atW(W):
+    return flux_el_yy_atW(W, eEbeam, pEbeam)
+
+# Parallel Calculation of Photon-Photon Luminosity Spectrum
+if __name__ == "__main__":
+    num_cores = 16  # Adjust based on available resources
+
+    # Use multiprocessing to parallelize computation over W values
+    with Pool(num_cores) as pool:
+        luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
+
+    # Save results to a text file
+    with open("Jacobian_Krzysztof_Inelastic_Updated_noMN.txt", "w") as file:
+        file.write("# W [GeV]    S_yy [GeV^-1]\n")
+        for W, S_yy in zip(W_values, luminosity_values):
+            file.write(f"{W:.6e}    {S_yy:.6e}\n")
+
+    # Example calculation at a specific W value for verification
+    W_value = 10.0  # GeV
+    luminosity_at_W10 = flux_el_yy_atW(W_value, eEbeam, pEbeam)
+    print(f"Photon-Photon Luminosity Spectrum at W = {W_value} GeV: {luminosity_at_W10:.6e} GeV^-1")
+
+    # Plot the Results
+    plt.figure(figsize=(10, 8))
+    plt.xlim(10.0, 1000.0)
+    plt.ylim(1.e-7, 1.e-1)
+    plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Inelastic')
+
+    # Add additional information to the plot
+    plt.text(15, 5.e-6, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
+    plt.text(15, 2.e-6, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
+    plt.text(15, 1.e-6, f'Luminosity at W={W_value} GeV = {luminosity_at_W10:.2e} GeV^-1', fontsize=14, color='blue')
+
+    # Plot settings
+    plt.xlabel(r"$W$ [GeV]", fontsize=18)
+    plt.ylabel(r"$S_{\gamma\gamma}$ [GeV$^{-1}$]", fontsize=18)
+    plt.title("Inelastic $S_{\gamma\gamma}$ at LHeC with Correct W", fontsize=20)
+    plt.grid(True, which="both", linestyle="--")
+    plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
+
+    # Save the plot as a PDF and JPG
+    plt.savefig("Jacobian_Krzysztof_Inelastic_Updated_noMN.pdf")
+    plt.savefig("Jacobian_Krzysztof_Inelastic_Updated_noMN.jpg")
+    plt.show()

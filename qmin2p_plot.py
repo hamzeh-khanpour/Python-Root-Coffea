@@ -1,3 +1,6 @@
+
+# qmin2p as a function of yp
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -10,7 +13,7 @@ def qmin2_proton(MN, yp):
     return ((MN**2) / (1 - yp) - Mp**2) * yp
 
 # Generate values for y_p from 0 to 1 (but not including 1 to avoid division by zero)
-y_p_values = np.logspace(-2, -0.01, 500)  # Log spaced values from 0.01 to 0.99
+y_p_values = np.logspace(-4, -0.01, 500)  # Log spaced values from 0.01 to 0.99
 
 # Calculate Q_p,min^2 for each value of y_p
 qmin2p_values = [qmin2_proton(MN, yp) for yp in y_p_values]
@@ -25,5 +28,9 @@ plt.title(r'$Q^2_{p,\mathrm{min}}$ as a function of $y_p$ for $M_N = 10$ GeV', f
 plt.grid(True, which="both", linestyle="--")
 
 plt.legend()
+
+# Save the plot as a PDF and JPG
+plt.savefig("qmin2p_values_yp.pdf")
+plt.savefig("qmin2p_values_yp.jpg")
 
 plt.show()
