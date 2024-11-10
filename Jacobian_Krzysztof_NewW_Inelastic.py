@@ -62,12 +62,14 @@ def tvalue(Q2):
     return math.log \
            ((math.log((Q2 + Q2_0) / Lambda2) / math.log(Q2_0 / Lambda2)))
 
+
 def xP(xbj, Q2):
     if xbj == 0:
         print("xbj zero")
         return -1.
     xPinv = 1. + Q2 / (Q2 + Mass2_P) * (1. / xbj - 1.)
     return 1. / xPinv
+
 
 def xR(xbj, Q2):    
     if xbj == 0:
@@ -76,38 +78,49 @@ def xR(xbj, Q2):
     xPinv = 1. + Q2 / (Q2 + Mass2_R) * (1. / xbj - 1.)
     return 1. / xPinv
 
+
 def type1(tval, tuple1):
     return tuple1[0] + tuple1[1] * (tval ** tuple1[2])
+
 
 def type2(tval, tuple1):
     return tuple1[0] +\
            (tuple1[0] - tuple1[1]) * (1. / (1. + tval ** tuple1[2]) - 1.)
 
+
 def aP(tval):
     return type2(tval, Cap)
+
 
 def bP(tval):
     return type1(tval, Cbp)
 
+
 def cP(tval):
     return type2(tval, Ccp)
+
 
 def aR(tval):
     return type1(tval, Car)
 
+
 def bR(tval):
     return type1(tval, Cbr)
 
+
 def cR(tval):
     return type1(tval, Ccr)
+
 
 def allm_f2P(xbj, Q2):
     tval = tvalue(Q2) 
     return cP(tval) * (xP(xbj, Q2) ** aP(tval)) * ((1. - xbj) ** bP(tval))
 
+
 def allm_f2R(xbj, Q2):
     tval = tvalue(Q2) 
     return cR(tval) * (xR(xbj, Q2) ** aR(tval)) * ((1. - xbj) ** bR(tval))
+
 
 def allm_f2(xbj, Q2):
     return Q2 / (Q2 + Mass2_0) * (allm_f2P(xbj, Q2) + allm_f2R(xbj, Q2))
@@ -132,6 +145,7 @@ def qmin2_proton(MN, y):
     return ((MN**2) / (1 - y) - pmass**2) * y
 
 
+
 # Function to compute y_p using given equation (F.18)
 def compute_yp(W, Q2e, Q2p, ye, Ee, Ep, MN):
     numerator = W**2 + Q2e + Q2p - (Q2e * (Q2p + MN**2 - pmass**2)) / (4 * Ee * Ep)
@@ -140,10 +154,12 @@ def compute_yp(W, Q2e, Q2p, ye, Ee, Ep, MN):
     return yp_value
 
 
+
 # Function to compute the Jacobian with respect to y_p
 def compute_jacobian(ye, Ee, Ep, W):
     jacobian = abs(2 * ye * Ee * Ep / W)
     return jacobian
+
 
 
 # Photon Flux from Electron (using lnQ2 as the integration variable) (Equation F.13)
@@ -213,7 +229,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
                     return 0.0
 
                 # Integration over Q2p using lnQ2p as the integration variable
-                qmin2p = qmin2_proton(MN, 0.01) # yp_value - Dicsussion is needed
+                qmin2p = qmin2_proton(MN, 0.01) # yp_value - Discussion is needed
                 lnQ2p_min = math.log(qmin2p)
                 lnQ2p_max = math.log(q2pmax)
 
