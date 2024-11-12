@@ -6,15 +6,17 @@ from scipy.interpolate import interp1d
 
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
+
 emass = 5.1099895e-4   # Electron mass in GeV
 pmass = 0.938272081    # Proton mass in GeV
 pi0mass = 0.1349768    # Pion mass in GeV
-q2emax = 100000.0      # Maximum photon virtuality for electron in GeV^2
-q2pmax = 10.0          # Maximum photon virtuality for proton in GeV^2
+
+q2emax = 100.0      # Maximum photon virtuality for electron in GeV^2
+q2pmax = 100.0          # Maximum photon virtuality for proton in GeV^2
 MN_max = 10.0          # Maximum MN in GeV
 
 # Load photon-photon luminosity data from the text file
-data = np.loadtxt('Jacobian_Krzysztof_Inelastic_Updated_Simple.txt', comments='#')
+data = np.loadtxt('Jacobian_Krzysztof_Inelastic_MonteCarlo_MN10.0_q2emax100_q2pmax100.txt', comments='#')
 W_data = data[:, 0]
 S_yy_data = data[:, 1]
 

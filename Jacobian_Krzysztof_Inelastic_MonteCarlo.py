@@ -145,10 +145,14 @@ if __name__ == "__main__":
     with Pool(num_cores) as pool:
         luminosity_values = pool.map(wrapper_monte_carlo_flux, W_values)
 
-    with open("Jacobian_Krzysztof_Inelastic_MonteCarlo.txt", "w") as file:
-        file.write("# W [GeV]    S_yy [GeV^-1]\n")
-        for W, S_yy in zip(W_values, luminosity_values):
-            file.write(f"{W:.6e}    {S_yy:.6e}\n")
+# Format the file name to include MN, q2emax, and q2pmax
+file_name = f"Jacobian_Krzysztof_Inelastic_MonteCarlo_MN{MN_max}_q2emax{int(q2emax)}_q2pmax{int(q2pmax)}.txt"
+
+with open(file_name, "w") as file:
+    file.write("# W [GeV]    S_yy [GeV^-1]\n")
+    for W, S_yy in zip(W_values, luminosity_values):
+        file.write(f"{W:.6e}    {S_yy:.6e}\n")
+
 
 
     # Plot the Results
@@ -165,7 +169,11 @@ if __name__ == "__main__":
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10 \, \mathrm{GeV}^2$', fontsize=14)
 
 
-    plt.savefig("Jacobian_Krzysztof_Inelastic_MonteCarlo.pdf")
-    plt.savefig("Jacobian_Krzysztof_Inelastic_MonteCarlo.jpg")
-    plt.show()
+# Format the base file name to include MN_max, q2emax, and q2pmax
+file_base = f"Jacobian_Krzysztof_Inelastic_MonteCarlo_MN{MN_max}_q2emax{int(q2emax)}_q2pmax{int(q2pmax)}"
+
+# Save the plots with the formatted file name
+plt.savefig(f"{file_base}.pdf")
+plt.savefig(f"{file_base}.jpg")
+
 

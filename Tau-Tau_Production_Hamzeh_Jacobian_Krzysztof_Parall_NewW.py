@@ -1,5 +1,7 @@
 
-# Integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel   Hamzeh Khanpour 2024
+#  Integrated tau_tau Cross Section Jacobian Krzysztof Parallel : Hamzeh Khanpour 2024
+#  Elastic Photon-Photon Luminosity Spectrum Calculation
+#  Integrated elastic tau tau Cross Section
 
 ################################################################################
 
@@ -11,18 +13,14 @@ import matplotlib.pyplot as plt
 from multiprocessing import Pool
 
 
-
-
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4   # Electron mass in GeV
 pmass = 0.938272081    # Proton mass in GeV
 
 
-
-q2emax = 1.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 1.0  # Maximum photon virtuality for proton in GeV^2
-
+q2emax = 10.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
 
 
 # Elastic Form Factors (Dipole Approximation)
@@ -31,10 +29,8 @@ def G_E(Q2):
 
 
 
-
 def G_M(Q2):
     return 7.78 * G_E(Q2)
-
 
 
 
@@ -66,7 +62,6 @@ def compute_jacobian(ye, yp, Q2e, Ee, Ep):
         return 0
     jacobian = abs(ye * s / (2 * W))
     return jacobian
-
 
 
 
@@ -109,7 +104,6 @@ def flux_y_proton(yp):
 
     result_lnQ2p, _ = integrate.quad(lnQ2p_integrand, lnQ2p_min, lnQ2p_max, epsrel=1e-4)
     return result_lnQ2p
-
 
 
 
@@ -156,7 +150,6 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
 
     result_ye, _ = integrate.quad(integrand, ye_min, ye_max, epsrel=1e-4)
     return result_ye
-
 
 
 
@@ -215,7 +208,7 @@ if __name__ == "__main__":
 
 
     # Save results to a text file
-    with open("With_Suppresion_Factor.txt", "w") as file:
+    with open("integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel_NewW.txt", "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
         for W, S_yy in zip(W_values, luminosity_values):
             file.write(f"{W:.6e}    {S_yy:.6e}\n")
@@ -252,8 +245,8 @@ if __name__ == "__main__":
     plt.grid(True, which="both", linestyle="--")
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
 
-    plt.savefig("Jacobian_Krzysztof_Parallel_NewW.pdf")
-    plt.savefig("Jacobian_Krzysztof_Parallel_NewW.jpg")
+    plt.savefig("Photon_Photon_Luminosity_Spectrum_Calculation_Jacobian_Krzysztof_Parallel_NewW.pdf")
+    plt.savefig("Photon_Photon_Luminosity_Spectrum_Calculation_Jacobian_Krzysztof_Parallel_NewW.jpg")
     
     plt.show()
 
@@ -289,8 +282,6 @@ if __name__ == "__main__":
     
     plt.show()
     
-    
 ################################################################################
-
 
 
