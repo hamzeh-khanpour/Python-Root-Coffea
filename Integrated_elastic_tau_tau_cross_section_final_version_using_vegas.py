@@ -127,7 +127,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
 
     # Optional: Print summary for debugging
     print(result.summary())
-    print('Result =', result, 'Q =', result.Q)
+    print('Result Syy =', result, 'Q =', result.Q)
 
     return result.mean if result.Q > 0.1 else None  # Return only if Q indicates stable result
 
@@ -183,7 +183,7 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 
     # Optional: Print summary for debugging
     print(result.summary())
-    print('Result =', result, 'Q =', result.Q)
+    print('Result tau tau xs =', result, 'Q =', result.Q)
 
     # Return mean of the result if Q is stable, otherwise 0.0
     return result.mean if result.Q > 0.1 else 0.0
