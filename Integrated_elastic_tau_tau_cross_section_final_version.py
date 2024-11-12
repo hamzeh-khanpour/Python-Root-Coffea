@@ -1,7 +1,8 @@
 
-#  Integrated tau_tau Cross Section Jacobian Krzysztof Parallel : Hamzeh Khanpour 2024
-#  Elastic Photon-Photon Luminosity Spectrum Calculation
-#  Integrated elastic tau tau Cross Section
+#  This code calculates the elastic Photon Luminosity Spectrum Syy
+#  Final Version (with corrected W^2 = -Q2e + ye * yp * s ) to solve the high photon virtuality issues
+#  This code also calculates the integrated elastic tau tau cross section (ep -> e p tau^+ tau^-)
+#  Hamzeh Khanpour, Laurent Forthomme, and Krzysztof Piotrzkowski -- November 2024
 
 ################################################################################
 
@@ -107,7 +108,7 @@ def flux_y_proton(yp):
 
 
 
-# Photon-Photon Luminosity Spectrum Calculation (Final Form using the Jacobian)
+# Photon Luminosity Spectrum Calculation (Final Form using the Jacobian)
 def flux_el_yy_atW(W, eEbeam, pEbeam):
     s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
 
@@ -202,23 +203,26 @@ if __name__ == "__main__":
     W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
 
 
-    # Calculate the Elastic Photon-Photon Luminosity Spectrum in Parallel
+    # Calculate the Elastic Photon Luminosity Spectrum in Parallel
     with Pool(processes=num_cores) as pool:
         luminosity_values = pool.starmap(flux_el_yy_atW, [(W, eEbeam, pEbeam) for W in W_values])
 
 
-    # Save results to a text file
-    with open("integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel_NewW.txt", "w") as file:
+    # Save results to a text file with q2emax and q2pmax included in the filename
+    filename_txt = f"Elastic_Photon_Luminosity_Spectrum_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}.txt"
+
+    # Ensure the file write operation occurs within the 'with' block
+    with open(filename_txt, "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
         for W, S_yy in zip(W_values, luminosity_values):
-            file.write(f"{W:.6e}    {S_yy:.6e}\n")
-
+            file.write(f"{W:.6e}    {S_yy:.6e}\n")  # Writing while file is still open
+    # The file automatically closes after the 'with' block ends
 
 
     # Calculate Elastic Photon-Photon Luminosity Spectrum at W0_value
     W0_value = 10.0  # GeV
     luminosity_at_W10 = flux_el_yy_atW(W0_value, eEbeam, pEbeam)
-    
+    print(f"Elastic Photon-Photon Luminosity Spectrum at W = {W0_value} GeV: {luminosity_at_W10:.6e} GeV^-1")
     
 
     # Calculate Integrated Tau-Tau Production Cross-Section at W_0 = 10 GeV
@@ -245,9 +249,14 @@ if __name__ == "__main__":
     plt.grid(True, which="both", linestyle="--")
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
 
-    plt.savefig("Photon_Photon_Luminosity_Spectrum_Calculation_Jacobian_Krzysztof_Parallel_NewW.pdf")
-    plt.savefig("Photon_Photon_Luminosity_Spectrum_Calculation_Jacobian_Krzysztof_Parallel_NewW.jpg")
-    
+
+# Save plot with q2emax and q2pmax values in the filename
+    filename_pdf = f"Elastic_Photon_Luminosity_Spectrum_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}.pdf"
+    filename_jpg = f"Elastic_Photon_Luminosity_Spectrum_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}.jpg"
+
+    plt.savefig(filename_pdf)
+    plt.savefig(filename_jpg)
+
     plt.show()
 
 
@@ -277,8 +286,13 @@ if __name__ == "__main__":
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
 
 
-    plt.savefig("integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel_NewW.pdf")
-    plt.savefig("integrated_tau_tau_cross_section_Jacobian_Krzysztof_Parallel_NewW.jpg")
+# Define filenames with q2emax and q2pmax values included
+    filename_pdf = f"Integrated_elastic_tau_tau_cross_section_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}.pdf"
+    filename_jpg = f"Integrated_elastic_tau_tau_cross_section_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}.jpg"
+
+# Save the plot with the customized filenames
+    plt.savefig(filename_pdf)
+    plt.savefig(filename_jpg)
     
     plt.show()
     
