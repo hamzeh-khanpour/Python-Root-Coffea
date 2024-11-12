@@ -120,14 +120,14 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
     integrator = vegas.Integrator([[0, 1], [0, 1]])
 
     # Training phase
-    integrator(vegas_integrand, nitn=5, neval=1000)
+    integrator(vegas_integrand, nitn=5, neval=10000) 
 
-    # Final evaluation with increased neval
-    result = integrator(vegas_integrand, nitn=10, neval=10000)
+    # Final evaluation
+    result = integrator(vegas_integrand, nitn=10, neval=100000)
 
     # Optional: Print summary for debugging
-    print(result.summary())
-    print('Result Syy =', result, 'Q =', result.Q)
+    #print(result.summary())
+    #print('Result Elastic Syy =', result, 'Q =', result.Q)
 
     return result.mean if result.Q > 0.1 else None  # Return only if Q indicates stable result
 
@@ -176,14 +176,14 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
     integrator = vegas.Integrator([[0, 1]])
 
     # Training phase
-    integrator(vegas_integrand, nitn=5, neval=1000)
+    integrator(vegas_integrand, nitn=5, neval=10000) 
 
     # Final evaluation
-    result = integrator(vegas_integrand, nitn=10, neval=10000)
+    result = integrator(vegas_integrand, nitn=10, neval=100000)
 
     # Optional: Print summary for debugging
-    print(result.summary())
-    print('Result tau tau xs =', result, 'Q =', result.Q)
+    #print(result.summary())
+    #print('Result Elastic tau tau xs =', result, 'Q =', result.Q)
 
     # Return mean of the result if Q is stable, otherwise 0.0
     return result.mean if result.Q > 0.1 else 0.0
@@ -192,14 +192,19 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 
 ################################################################################
 
+# Parameters
+eEbeam = 50.0  # Electron beam energy in GeV
+pEbeam = 7000.0  # Proton beam energy in GeV
+W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
 
+num_cores = 10  # Set this to the number of cores you want to use
+
+# Wrapper function for parallel processing
+def wrapper_flux_el_yy_atW(W):
+    return flux_el_yy_atW(W, eEbeam, pEbeam)
+
+# Parallel Calculation of the Photon-Photon Luminosity Spectrum
 if __name__ == "__main__":
-    num_cores = 10  # Set this to the number of cores you want to use
-
-    # Parameters
-    eEbeam = 50.0     # Electron beam energy in GeV
-    pEbeam = 7000.0   # Proton beam energy in GeV
-    W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
 
     # Calculate the Elastic Photon Luminosity Spectrum in Parallel
     with Pool(processes=num_cores) as pool:
@@ -221,7 +226,7 @@ if __name__ == "__main__":
 
     # Calculate Integrated Tau-Tau Production Cross-Section at W_0 = 10 GeV
     integrated_cross_section_value = integrated_tau_tau_cross_section(W0_value, eEbeam, pEbeam)
-    print(f"Integrated Tau-Tau Production Cross-Section at W_0 = {W0_value} GeV: {integrated_cross_section_value:.6e} pb")
+    print(f"Integrated Elastic Tau-Tau Production Cross-Section at W_0 = {W0_value} GeV: {integrated_cross_section_value:.6e} pb")
 
 
     # Plot the Elastic Photon-Photon Luminosity Spectrum
@@ -252,6 +257,7 @@ if __name__ == "__main__":
 
     # Plot the Tau-Tau Production Cross-Section as a Function of W_0
     W0_range = np.arange(10.0, 1001.0, 1.0)
+    
     with Pool(processes=num_cores) as pool:
         cross_section_values = pool.starmap(integrated_tau_tau_cross_section, [(W0, eEbeam, pEbeam) for W0 in W0_range])
 

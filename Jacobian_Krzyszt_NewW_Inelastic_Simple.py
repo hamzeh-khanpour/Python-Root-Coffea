@@ -240,6 +240,8 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
     result_ye, _ = integrate.quad(integrand, ye_min, ye_max, epsrel=1e-4)
     return result_ye
 
+
+
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
@@ -289,3 +291,5 @@ if __name__ == "__main__":
     plt.savefig("Jacobian_Krzysztof_Inelastic_Updated_Simple.pdf")
     plt.savefig("Jacobian_Krzysztof_Inelastic_Updated_Simple.jpg")
     plt.show()
+
+    

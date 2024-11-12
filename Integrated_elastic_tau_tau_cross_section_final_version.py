@@ -107,6 +107,8 @@ def flux_y_proton(yp):
     return result_lnQ2p
 
 
+################################################################################
+
 
 # Photon Luminosity Spectrum Calculation (Final Form using the Jacobian)
 def flux_el_yy_atW(W, eEbeam, pEbeam):
@@ -152,6 +154,8 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
     result_ye, _ = integrate.quad(integrand, ye_min, ye_max, epsrel=1e-4)
     return result_ye
 
+
+################################################################################
 
 
 # Tau-Tau Production Cross-Section Calculation at Given W
