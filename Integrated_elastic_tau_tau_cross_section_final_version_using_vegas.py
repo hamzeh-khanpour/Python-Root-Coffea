@@ -120,10 +120,10 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
     integrator = vegas.Integrator([[0, 1], [0, 1]])
 
     # Training phase
-    integrator(vegas_integrand, nitn=5, neval=10000) 
+    integrator(vegas_integrand, nitn=5, neval=1000) 
 
     # Final evaluation
-    result = integrator(vegas_integrand, nitn=10, neval=100000)
+    result = integrator(vegas_integrand, nitn=10, neval=10000)
 
     # Optional: Print summary for debugging
     #print(result.summary())
@@ -176,10 +176,10 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
     integrator = vegas.Integrator([[0, 1]])
 
     # Training phase
-    integrator(vegas_integrand, nitn=5, neval=10000) 
+    integrator(vegas_integrand, nitn=5, neval=1000) 
 
     # Final evaluation
-    result = integrator(vegas_integrand, nitn=10, neval=100000)
+    result = integrator(vegas_integrand, nitn=10, neval=10000)
 
     # Optional: Print summary for debugging
     #print(result.summary())
