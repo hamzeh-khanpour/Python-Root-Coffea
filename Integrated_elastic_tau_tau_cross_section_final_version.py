@@ -235,10 +235,9 @@ if __name__ == "__main__":
     plt.xlim(10.0, 1000.0)
     plt.ylim(1.e-7, 1.e-1)
     plt.loglog(W_values, luminosity_values, linestyle='solid', linewidth=2, label='Elastic')
+
     plt.text(15, 5.e-6, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
     plt.text(15, 2.e-6, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
-
-
     # Corrected line with luminosity_at_W10 now defined
     plt.text(15, 1.e-6, f'Luminosity at W={W0_value} GeV = {luminosity_at_W10:.2e} GeV^-1', fontsize=14, color='blue')
 
