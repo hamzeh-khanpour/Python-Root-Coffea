@@ -5,6 +5,7 @@
 
 ################################################################################
 
+
 import numpy as np
 import math
 import vegas  # For Monte Carlo integration with vegas
@@ -84,6 +85,7 @@ def flux_y_proton(yp):
     result_lnQ2p, _ = integrate.quad(lnQ2p_integrand, math.log(qmin2p), math.log(q2pmax), epsrel=1e-4)
     return result_lnQ2p
 
+
 ################################################################################
 
 
@@ -92,24 +94,45 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
     s_cms = 4.0 * eEbeam * pEbeam
     ye_min, ye_max = W**2.0 / s_cms, 1.0
 
-    # Define integrand for vegas
-    def integrand(x):
-        ye = x[0] * (ye_max - ye_min) + ye_min
-        lnQ2e = x[1] * (math.log(q2emax) - math.log(qmin2(emass, ye))) + math.log(qmin2(emass, ye))
+    # Define the integrand function
+    def vegas_integrand(x):
+        ye, lnQ2e = ye_min + x[0] * (ye_max - ye_min), math.log(qmin2(emass, ye_min)) + x[1] * (math.log(q2emax) - math.log(qmin2(emass, ye_min)))
         Q2e = np.exp(lnQ2e)
+        
+        # Compute necessary values
         yp_value = compute_yp(W, Q2e, ye, eEbeam, pEbeam)
+        if yp_value <= 0 or yp_value >= 1:
+            return 0.0
+        
+        # Calculate the Jacobian
         jacobian = compute_jacobian(ye, yp_value, Q2e, eEbeam, pEbeam)
+        if jacobian == 0:
+            return 0.0
 
-        if 0 < yp_value < 1 and jacobian != 0:
-            flux_e = flux_y_electron(ye, lnQ2e)
-            proton_flux = flux_y_proton(yp_value)
-            return flux_e * proton_flux / jacobian
-        return 0.0
+        # Photon flux calculations
+        proton_flux = flux_y_proton(yp_value)
+        flux_e = flux_y_electron(ye, lnQ2e)
+        
+        # Multiply by the volume elements
+        return flux_e * proton_flux / jacobian * (ye_max - ye_min) * (math.log(q2emax) - math.log(qmin2(emass, ye_min)))
 
-    # Perform vegas integration
-    integ = vegas.Integrator([[0, 1], [0, 1]])
-    result = integ(integrand, nitn=10, neval=10000)
-    return result.mean if result.mean is not None else 0.0  # Ensure numeric return value
+    # Set up the vegas Integrator with bounds for ye and lnQ2e as [0, 1] for vegas
+    integrator = vegas.Integrator([[0, 1], [0, 1]])
+
+    # Training phase
+    integrator(vegas_integrand, nitn=5, neval=1000)
+
+    # Final evaluation with increased neval
+    result = integrator(vegas_integrand, nitn=10, neval=10000)
+
+    # Optional: Print summary for debugging
+    print(result.summary())
+    print('Result =', result, 'Q =', result.Q)
+
+    return result.mean if result.Q > 0.1 else None  # Return only if Q indicates stable result
+
+
+################################################################################
 
 
 
@@ -134,12 +157,36 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
     s_cms = 4.0 * eEbeam * pEbeam
     upper_limit = np.sqrt(s_cms)
 
-    def integrand(W):
-        return cs_tautau_w_condition_Hamzeh(W[0]) * flux_el_yy_atW(W[0], eEbeam, pEbeam)
+    # Define the vegas integrand for the cross-section
+    def vegas_integrand(x):
+        # Scale x from [0, 1] to [W0, upper_limit]
+        W = W0 + x[0] * (upper_limit - W0)
+        
+        # Calculate the cross-section and luminosity spectrum
+        tau_tau_cross_section = cs_tautau_w_condition_Hamzeh(W)
+        luminosity_spectrum = flux_el_yy_atW(W, eEbeam, pEbeam)
+        
+        if luminosity_spectrum is None:
+            luminosity_spectrum = 0.0  # Handle NoneType if vegas fails
+        
+        # Return the product and scale by volume element (upper_limit - W0)
+        return tau_tau_cross_section * luminosity_spectrum * (upper_limit - W0)
 
-    integ = vegas.Integrator([[W0, upper_limit]])
-    result = integ(integrand, nitn=10, neval=10000)
-    return result.mean if result.mean is not None else 0.0  # Ensure numeric return value
+    # Set up the vegas Integrator for W range [W0, upper_limit] mapped to [0, 1]
+    integrator = vegas.Integrator([[0, 1]])
+
+    # Training phase
+    integrator(vegas_integrand, nitn=5, neval=1000)
+
+    # Final evaluation
+    result = integrator(vegas_integrand, nitn=10, neval=10000)
+
+    # Optional: Print summary for debugging
+    print(result.summary())
+    print('Result =', result, 'Q =', result.Q)
+
+    # Return mean of the result if Q is stable, otherwise 0.0
+    return result.mean if result.Q > 0.1 else 0.0
 
 
 
@@ -236,7 +283,6 @@ if __name__ == "__main__":
     plt.savefig(filename_jpg)
     
     plt.show()
-    
+
+
 ################################################################################
-
-
