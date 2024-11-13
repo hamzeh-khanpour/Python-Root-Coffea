@@ -3,7 +3,7 @@
 ## Overview
 
 This repository contains Python scripts for calculating the **elastic/inelastic photon-photon luminosity spectrum** (`S_yy`) and 
-the **tau-tau production cross-section** for the process \( ep \rightarrow e (\gamma\gamma \rightarrow \tau^+\tau^-) p^{(*)} \). 
+the **tau-tau production cross-section** for the process $ep \rightarrow e (\gamma\gamma \rightarrow \tau^+\tau^-) p^{(*)}$. 
 
 ## Features
 
