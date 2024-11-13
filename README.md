@@ -128,3 +128,10 @@ result = integrator(vegas_integrand, nitn=20, neval=100000)
 
 For further details on the Vegas library, please refer to the [official Vegas documentation](https://pypi.org/project/vegas/). This repository leverages Vegas's adaptive multi-dimensional integration capabilities to produce precise and reliable results for complex high-energy physics calculations.
 
+
+## Contacts
+For additional information or questions, contact us using the email adresses below:
+- Hamzeh Khanpour (Hamzeh.Khanpour@cern.ch)
+- Laurent Forthomme (Laurent.Forthomme@cern.ch)
+- Krzysztof Piotrzkowski (piotrzkowski@agh.edu.pl)
+  
