@@ -36,8 +36,8 @@ emass = 5.1099895e-4   # Electron mass in GeV
 pmass = 0.938272081    # Proton mass in GeV
 pi0mass = 0.1349768    # Pion mass in GeV
 
-q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
+q2emax = 10.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
 MN_max = 10.0  # Maximum MN in GeV
 
 

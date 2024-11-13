@@ -89,9 +89,9 @@ if __name__ == "__main__":
     plt.text(15, 5.e-3, f'Integrated Inelastic Tau-Tau Cross-Section at W_0={W0_value} GeV = {integrated_cross_section_value:.2e} pb', fontsize=14, color='blue')
 
     plt.xlabel(r"$W_0$ [GeV]", fontsize=18)
-    plt.ylabel(r"$\sigma_{\tau^+\tau^-}$ (W > $W_0$) [pb]", fontsize=18)
+    plt.ylabel(r"$\sigma_{{\rm ep}\to {\rm e}(\gamma\gamma\to\tau^+\tau^-){\rm p}^{(\ast)}}$ (W > W$_0$) [pb]", fontsize=18)
 
-    plt.title("Integrated Inelastic Tau-Tau Production Cross-Section at LHeC (Corrected)", fontsize=20)
+    plt.title("Inelastic Tau-Tau Production Cross-Section (with corrected W)", fontsize=20)
     plt.grid(True, which="both", linestyle="--")
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
 
