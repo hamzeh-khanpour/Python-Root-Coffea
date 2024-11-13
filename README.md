@@ -60,7 +60,7 @@ python Integrated_elastic_tau_tau_cross_section_final_version_using_vegas.py
 
 Results are saved in `Inelastic_Photon_Luminosity_Spectrum_MNmax_<value>_q2emax_<value>_q2pmax_<value>_using_vegas.txt`.
 
-### 2. Generate Photon-Photon Luminosity Spectrum (`$S_{\gamma\gamma}$` and cross-sections calculations)  - inelastic case
+### 2. Generate Photon-Photon Luminosity Spectrum ($S_{\gamma\gamma}$ and cross-sections calculations)  - inelastic case
 
 Using `Integrated_inelastic_tau_tau_cross_section_final_version_using_vegas.py`, calculate the iSyy and integrated tau-tau production cross-section. 
 This script reads $S_{\gamma\gamma}$ data, interpolates it, and performs integration to compute the cross-section at each threshold energy `W0`.
