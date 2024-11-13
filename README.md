@@ -71,7 +71,7 @@ python Integrated_inelastic_tau_tau_cross_section_final_version_using_vegas.py
 
 The script outputs the integrated tau-tau cross-section and saves the result plot.
 
-## Results and Visualization
+## 3. Results and Visualization
 
 Each script outputs results in both text and graphical formats:
 - $S_{\gamma\gamma}$ and cross-section data are saved in `.txt` files.
@@ -82,7 +82,7 @@ To emphasize the use of **Vegas integration** in the project, here’s a detaile
 
 ---
 
-## Vegas Monte Carlo Integration
+## 4. Vegas Monte Carlo Integration
 
 This project extensively leverages the **Vegas Monte Carlo Integration** method to accurately compute elastic/inelastic photon-photon luminosity ($S_{\gamma\gamma}$) and 
 tau-tau production cross-sections over a complex multi-dimensional parameter space. 
@@ -129,7 +129,7 @@ result = integrator(vegas_integrand, nitn=20, neval=100000)
 For further details on the Vegas library, please refer to the [official Vegas documentation](https://pypi.org/project/vegas/). This repository leverages Vegas's adaptive multi-dimensional integration capabilities to produce precise and reliable results for complex high-energy physics calculations.
 
 
-## Contacts
+## 5. Contacts
 For additional information or questions, contact us using the email adresses below:
 - Hamzeh Khanpour (Hamzeh.Khanpour@cern.ch)
 - Laurent Forthomme (Laurent.Forthomme@cern.ch)
