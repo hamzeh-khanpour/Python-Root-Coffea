@@ -16,7 +16,7 @@ q2pmax = 50.0      # Maximum photon virtuality for proton in GeV^2
 MN_max = 10.0      # Maximum MN in GeV
 
 # Load photon-photon luminosity data from the text file
-data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_100000_using_vegas.txt', comments='#')
+data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_10_q2pmax_10_using_vegas.txt', comments='#')
 W_data = data[:, 0]
 S_yy_data = data[:, 1]
 

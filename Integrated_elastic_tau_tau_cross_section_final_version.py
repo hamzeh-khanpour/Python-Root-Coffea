@@ -204,7 +204,7 @@ if __name__ == "__main__":
     # Parameters
     eEbeam = 50.0  # Electron beam energy in GeV
     pEbeam = 7000.0  # Proton beam energy in GeV
-    W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
+    W_values = np.logspace(1.0, 3.0, 303)  # Range of W values from 10 GeV to 1000 GeV
 
 
     # Calculate the Elastic Photon Luminosity Spectrum in Parallel
