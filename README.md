@@ -45,7 +45,10 @@ the **tau-tau production cross-section** for the process $ep \rightarrow e (\gam
 
 Install dependencies via:
 ```bash
-pip install numpy scipy matplotlib
+pip install numpy 
+pip install scipy
+pip install matplotlib
+pip install vegas
 ```
 
 ## Usage
