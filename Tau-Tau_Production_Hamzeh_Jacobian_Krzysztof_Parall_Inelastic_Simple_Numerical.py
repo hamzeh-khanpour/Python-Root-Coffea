@@ -11,12 +11,12 @@ emass = 5.1099895e-4   # Electron mass in GeV
 pmass = 0.938272081    # Proton mass in GeV
 pi0mass = 0.1349768    # Pion mass in GeV
 
-q2emax = 50.0      # Maximum photon virtuality for electron in GeV^2
-q2pmax = 50.0      # Maximum photon virtuality for proton in GeV^2
+q2emax = 10.0      # Maximum photon virtuality for electron in GeV^2
+q2pmax = 10.0      # Maximum photon virtuality for proton in GeV^2
 MN_max = 10.0      # Maximum MN in GeV
 
 # Load photon-photon luminosity data from the text file
-data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_10_q2pmax_10_using_vegas.txt', comments='#')
+data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_100000_using_vegas.txt', comments='#')
 W_data = data[:, 0]
 S_yy_data = data[:, 1]
 

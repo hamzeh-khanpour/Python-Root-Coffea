@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # Load data from both files
 W_simple, Syy_simple = np.loadtxt("Jacobian_Krzysztof_Inelastic_Updated_Simple.txt", skiprows=1, unpack=True)
-W_krzysztof, Syy_krzysztof = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_100000_using_vegas.txt", skiprows=1, unpack=True)
+W_krzysztof, Syy_krzysztof = np.loadtxt("iInelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_100000_using_vegas.txt", skiprows=1, unpack=True)
 
 # Plot the comparison of S_yy as a function of W
 plt.figure(figsize=(10, 8))
@@ -18,7 +18,7 @@ plt.xlim(10.0, 1000.0)
 plt.ylim(1.e-7, 1.e-1)
 
 plt.loglog(W_simple, Syy_simple, 'r-', label="W^2 = ye yp s", linewidth=2)
-plt.loglog(W_krzysztof, Syy_krzysztof, 'b--', label="W^2 = full inelastic case", linewidth=2)
+plt.loglog(W_krzysztof, Syy_krzysztof, 'b--', label="W^2 = -Q_e^2 - Q_p^2 + y_e y_p s + Q_e^2 (Q_p^2 + M_N^2 - M_p^2)/s", linewidth=2)
 
 
 
@@ -47,8 +47,6 @@ plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{G
 # Save the plot as a PDF and JPG
 plt.savefig("Comparison_Luminosity_Spectrum_NewW_Inelastic.pdf")
 plt.savefig("Comparison_Luminosity_Spectrum_NewW_Inelastic.jpg")
-
-
 
 
 
