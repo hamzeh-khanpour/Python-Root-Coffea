@@ -36,8 +36,8 @@ emass = 5.1099895e-4   # Electron mass in GeV
 pmass = 0.938272081    # Proton mass in GeV
 pi0mass = 0.1349768    # Pion mass in GeV
 
-q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
+q2emax = 10.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
 MN_max = 10.0  # Maximum MN in GeV
 
 
@@ -253,10 +253,10 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
     integrator = vegas.Integrator([[0, 1], [0, 1], [0, 1], [0, 1]])
 
     # Training phase
-    integrator(vegas_integrand, nitn=5, neval=10000) 
+    integrator(vegas_integrand, nitn=5, neval=1000) 
 
     # Final evaluation
-    result = integrator(vegas_integrand, nitn=10, neval=100000)
+    result = integrator(vegas_integrand, nitn=10, neval=10000)
 
     # Optional: Print summary for debugging
     #print(result.summary())
@@ -311,10 +311,10 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
     integrator = vegas.Integrator([[0, 1]])
 
     # Training phase
-    integrator(vegas_integrand, nitn=5, neval=10000) 
+    integrator(vegas_integrand, nitn=5, neval=1000) 
 
     # Final evaluation
-    result = integrator(vegas_integrand, nitn=10, neval=100000)
+    result = integrator(vegas_integrand, nitn=10, neval=10000)
 
     # Optional: Print summary for debugging
     #print(result.summary())
@@ -354,9 +354,9 @@ if __name__ == "__main__":
     with open(filename, "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
         for W, S_yy in zip(W_values, luminosity_values):
-        # Use a default value if S_yy is None
-            S_yy = S_yy if S_yy is not None else 0.0
-            file.write(f"{W:.6e}    {S_yy:.6e}\n")
+        # Only write non-zero and non-None S_yy values
+            if S_yy is not None and S_yy != 0.0:
+                file.write(f"{W:.6e}    {S_yy:.6e}\n")
 
 
     W_value = 10.0  # GeV

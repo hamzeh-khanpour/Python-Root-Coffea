@@ -215,8 +215,10 @@ if __name__ == "__main__":
     with open(filename_txt, "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
         for W, S_yy in zip(W_values, luminosity_values):
-            S_yy = S_yy if S_yy is not None else 0.0  # Ensure S_yy is numeric
-            file.write(f"{W:.6e}    {S_yy:.6e}\n")
+
+            # Only write non-zero and non-None S_yy values
+            if S_yy is not None and S_yy != 0.0:
+                file.write(f"{W:.6e}    {S_yy:.6e}\n")
 
 
     # Calculate Elastic Photon-Photon Luminosity Spectrum at W0_value

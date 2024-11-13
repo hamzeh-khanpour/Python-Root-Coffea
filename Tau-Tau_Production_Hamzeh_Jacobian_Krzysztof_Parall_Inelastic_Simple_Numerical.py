@@ -11,9 +11,9 @@ emass = 5.1099895e-4   # Electron mass in GeV
 pmass = 0.938272081    # Proton mass in GeV
 pi0mass = 0.1349768    # Pion mass in GeV
 
-q2emax = 10000.0      # Maximum photon virtuality for electron in GeV^2
-q2pmax = 10000.0          # Maximum photon virtuality for proton in GeV^2
-MN_max = 10.0          # Maximum MN in GeV
+q2emax = 50.0      # Maximum photon virtuality for electron in GeV^2
+q2pmax = 50.0      # Maximum photon virtuality for proton in GeV^2
+MN_max = 10.0      # Maximum MN in GeV
 
 # Load photon-photon luminosity data from the text file
 data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_100000_using_vegas.txt', comments='#')
@@ -41,10 +41,20 @@ def cs_tautau_w_condition_Hamzeh(W):
 def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
     s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
 
+    def integrand(W):
+        # Get the tau-tau cross-section and S_yy value
+        tau_tau_cross_section = cs_tautau_w_condition_Hamzeh(W)
+        S_yy_value = S_yy_interp(W)
+
+        # Skip integration if S_yy is zero to avoid contributing zero values
+        if S_yy_value == 0.0:
+            #print(f"Skipping W={W} due to S_yy=0")
+            return 0.0
+
+        return tau_tau_cross_section * S_yy_value
+
     try:
-        result, _ = integrate.quad(
-            lambda W: cs_tautau_w_condition_Hamzeh(W) * S_yy_interp(W),
-            W0, np.sqrt(s_cms), epsrel=1e-4)
+        result, _ = integrate.quad(integrand, W0, np.sqrt(s_cms), epsrel=1e-4)
     except integrate.IntegrationWarning:
         print(f"Warning: Integration for tau-tau production cross-section did not converge for W_0={W0}")
         result = 0.0
@@ -56,8 +66,6 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 ################################################################################
 
 if __name__ == "__main__":
-    num_cores = 100  # Set this to the number of cores you want to use
-
     # Parameters
     eEbeam = 50.0  # Electron beam energy in GeV
     pEbeam = 7000.0  # Proton beam energy in GeV
@@ -78,7 +86,6 @@ if __name__ == "__main__":
     plt.loglog(W0_range, cross_section_values, linestyle='solid', linewidth=2, label='Inelastic')
     plt.text(15, 2.e-2, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
     plt.text(15, 1.e-2, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
-
     plt.text(15, 5.e-3, f'Integrated Inelastic Tau-Tau Cross-Section at W_0={W0_value} GeV = {integrated_cross_section_value:.2e} pb', fontsize=14, color='blue')
 
     plt.xlabel(r"$W_0$ [GeV]", fontsize=18)
@@ -94,5 +101,3 @@ if __name__ == "__main__":
     plt.show()
     
 ################################################################################
-
-
