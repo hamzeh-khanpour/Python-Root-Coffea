@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 
 # Load data from both files
-W_simple, Syy_simple = np.loadtxt("Jacobian_Krzysztof_Inelastic_Updated_Simple.txt", skiprows=1, unpack=True)
-W_krzysztof, Syy_krzysztof = np.loadtxt("iInelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_100000_using_vegas.txt", skiprows=1, unpack=True)
+W_simple, Syy_simple = np.loadtxt("Jacobian_Krzysztof_Inelastic_Updated_Simple_Final.txt", skiprows=1, unpack=True)
+W_krzysztof, Syy_krzysztof = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_100000_using_vegas.txt", skiprows=1, unpack=True)
 
 # Plot the comparison of S_yy as a function of W
 plt.figure(figsize=(10, 8))
