@@ -76,4 +76,55 @@ The script outputs the integrated tau-tau cross-section and saves the result plo
 Each script outputs results in both text and graphical formats:
 - `S_yy` and cross-section data are saved in `.txt` files.
 - Plots are generated for the luminosity spectrum, tau-tau cross-section, and model comparisons. Files are saved as `.pdf` and `.jpg`.
+- 
+
+To emphasize the use of **Vegas integration** in the project, here’s a detailed description you can add at the end of your `README.md` file:
+
+---
+
+## Vegas Monte Carlo Integration
+
+This project extensively leverages the **Vegas Monte Carlo Integration** method to accurately compute elastic/inelastic photon-photon luminosity (`S_yy`) and 
+tau-tau production cross-sections over a complex multi-dimensional parameter space. 
+
+### Why Vegas?
+
+The Vegas integration method is particularly powerful for high-dimensional and complex integrals where traditional 
+numerical methods become impractical. 
+By adapting the sampling density to focus on regions of high importance within the integration domain, 
+Vegas improves convergence rates and computational efficiency. 
+In this project, we use Vegas to handle integrations over multiple variables, 
+including photon virtualities and kinematic parameters, for more precise `S_yy` and cross-section values.
+
+### Vegas Library in Python
+
+The implementation in this repository utilizes the [Vegas Python library](https://pypi.org/project/vegas/), 
+a popular library for Monte Carlo integration that follows the adaptive importance-sampling strategy of the original Fortran and C implementations. 
+Some key features of Vegas integration as applied here include:
+
+- **Adaptive Sampling**: Vegas adapts its sampling strategy over multiple iterations (`nitn`), enhancing accuracy in high-contribution regions.
+- **Multi-dimensional Integration**: By performing multi-dimensional integration in an efficient, parallelized manner, Vegas enables us to accurately model high-energy physics scenarios like tau-tau production.
+- **Precision Control**: Parameters such as `nitn` (number of iterations) and `neval` (number of evaluations per iteration) are optimized to control the balance between computational time and precision.
+
+### Vegas Integration Parameters
+
+In our calculations, we set the following parameters for Vegas:
+
+- **Training Phase**: The initial phase with a lower `nitn` and `neval` allows Vegas to learn the structure of the integrand and improve sampling efficiency.
+- **Final Evaluation**: In the final evaluation phase, we use a higher `nitn` and `neval` to converge on a precise result.
+
+You can adjust these values in the code to balance speed and precision based on available computational resources. Here’s an example configuration used in this project:
+
+```python
+# Example Vegas parameters for integrator setup
+integrator = vegas.Integrator([[0, 1], [0, 1], [0, 1], [0, 1]])
+
+# Training phase
+integrator(vegas_integrand, nitn=10, neval=10000)
+
+# Final evaluation phase
+result = integrator(vegas_integrand, nitn=20, neval=100000)
+```
+
+For further details on the Vegas library, please refer to the [official Vegas documentation](https://pypi.org/project/vegas/). This repository leverages Vegas's adaptive multi-dimensional integration capabilities to produce precise and reliable results for complex high-energy physics calculations.
 
