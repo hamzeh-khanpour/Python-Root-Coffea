@@ -28,7 +28,7 @@ the **tau-tau production cross-section** for the process $ep \rightarrow e (\gam
   - Calculates and integrates the tau-tau production cross-section using $S_{\gamma\gamma}$ data from a precomputed file.
   - Provides options to skip integration for W values where $S_{\gamma\gamma}$ is zero, improving performance and accuracy.
 
-- **`Integrated_elastic_tau_tau_cross_section_final_version_using_vegas.py`**   and **`Integrated_inelastic_tau_tau_cross_section_final_version_using_vegas.py`**
+- **`Integrated_elastic_tau_tau_cross_section_final_version_using_vegas.py`** and **`Integrated_inelastic_tau_tau_cross_section_final_version_using_vegas.py`**
   - Compares $S_{\gamma\gamma}$ values between a simple approximation and the corrected inelastic model.
   - Computes and plots the relative difference between the two models for a comprehensive comparison.
 
@@ -49,7 +49,7 @@ pip install numpy scipy matplotlib
 
 ## Usage
 
-### 1. Generate Photon-Photon Luminosity Spectrum (`S_yy` and cross-sections calculations) - elastic case
+### 1. Generate Photon-Photon Luminosity Spectrum ($S_{\gamma\gamma}$ and cross-sections calculations) - elastic case
 
 Run `Integrated_elastic_tau_tau_cross_section_final_version_using_vegas.py` to compute $S_{\gamma\gamma}$ and integrated tau-tau production cross-section for elastic interactions. 
 Customize parameters such as the beam energies, \( Q^2 \) maximum values, and MN upper limit before running the script.
