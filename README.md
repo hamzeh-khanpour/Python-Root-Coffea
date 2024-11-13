@@ -7,7 +7,7 @@ the **tau-tau production cross-section** for the process $ep \rightarrow e (\gam
 
 ## Features
 
-- **Photon-Photon Luminosity Spectrum Calculation** (`$S_{\gamma\gamma}$`):
+- **Photon-Photon Luminosity Spectrum Calculation** ($S_{\gamma\gamma}$):
   - Computes `$S_{\gamma\gamma}$` for a range of center-of-mass energies `W`.
   - Allows flexibility for analyzing dimuon or Higgsinos production cross-sections as well. 
   
