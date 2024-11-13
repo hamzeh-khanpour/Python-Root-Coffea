@@ -1,5 +1,10 @@
-# Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2_Jacobian_Inelastic_Case
-# Hamzeh, Laurent and Krzysztof ---- 4 November 2024
+#  This code calculates the "inelastic" Photon Luminosity Spectrum Syy : using Vegas for the integration
+#  Final Version (with corrected W^2 = .....) to solve high photon virtuality issues
+#  This code also calculates the integrated "inelastic" tau tau cross section (ep -> e p tau^+ tau^-)
+#  Hamzeh Khanpour, Laurent Forthomme, and Krzysztof Piotrzkowski -- November 2024
+
+################################################################################
+
 
 import numpy as np
 import math
@@ -25,7 +30,6 @@ import vegas
 # sf_Kulagin_Barinov = pycepgen.StructureFunctionsFactory.build(303)
 
 
-
 # Constants in GeV
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4   # Electron mass in GeV
@@ -35,7 +39,6 @@ pi0mass = 0.1349768    # Pion mass in GeV
 q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
 q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
 MN_max = 10.0  # Maximum MN in GeV
-
 
 
 #=========================================================================
@@ -54,7 +57,6 @@ Cbp = (0.36292, 1.8917,   1.8439)
 Ccr = (0.80107, 0.97307, 3.4942)
 Car = (0.58400, 0.37888, 2.6063)
 Cbr = (0.01147, 3.7582,  0.49338)
-
 
 
 # --------------------------------------------------------------
@@ -175,7 +177,6 @@ def flux_y_electron(ye, lnQ2e):
 
     flux = ALPHA2PI / (ye * Q2e) * ((1 - ye) * (1 - qmin2v / Q2e) + 0.5 * ye**2)
     return flux * Q2e  # Multiply by Q2e to account for dQ^2 = Q^2 d(lnQ^2)
-
 
 
 
@@ -330,7 +331,7 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
-W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
+W_values = np.logspace(1.0, 3.0, 303)  # Range of W values from 10 GeV to 1000 GeV
 
 num_cores = 10  # Set this to the number of cores you want to use
 

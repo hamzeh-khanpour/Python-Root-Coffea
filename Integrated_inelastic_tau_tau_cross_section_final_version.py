@@ -1,5 +1,9 @@
-# Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2_Jacobian_Inelastic_Case
-# Hamzeh, Laurent and Krzysztof ---- 4 November 2024
+#  This code calculates the "inelastic" Photon Luminosity Spectrum Syy : using integrate.quad for the integration
+#  Final Version (with corrected W^2 = .....) to solve high photon virtuality issues
+#  This code also calculates the integrated "inelastic" tau tau cross section (ep -> e p tau^+ tau^-)
+#  Hamzeh Khanpour, Laurent Forthomme, and Krzysztof Piotrzkowski -- November 2024
+
+################################################################################
 
 import numpy as np
 import math
@@ -31,7 +35,7 @@ pmass = 0.938272081    # Proton mass in GeV
 pi0mass = 0.1349768    # Pion mass in GeV
 
 q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
+q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
 MN_max = 10.0  # Maximum MN in GeV
 
 
@@ -196,6 +200,8 @@ def flux_y_proton(yp, lnQ2p, MN):
     return flux * Q2p  # Multiply by Q2p to account for dQ^2 = Q^2 d(lnQ^2)
 
 
+################################################################################
+
 
 
 # The Inelastic Photon-Photon Luminosity Spectrum Calculation (Final Form using the Jacobian) (F.19)
@@ -227,9 +233,16 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
                 jacobian = compute_jacobian(ye, eEbeam, pEbeam, W)
                 if jacobian == 0:
                     return 0.0
+                
+                    # Calculate y_p using Equation (F.18) dynamically based on current Q2p
+                yp_value = compute_yp(W, Q2e, 0.0, ye, eEbeam, pEbeam, MN)
+
+                    # Check if the computed yp is valid
+                if yp_value <= 0 or yp_value >= 1:
+                    return 0.0
 
                 # Integration over Q2p using lnQ2p as the integration variable
-                qmin2p = qmin2_proton(MN, 0.01) # yp_value - Discussion is needed
+                qmin2p = qmin2_proton(MN, yp_value) # yp_value - Discussion is needed
                 lnQ2p_min = math.log(qmin2p)
                 lnQ2p_max = math.log(q2pmax)
 
@@ -264,10 +277,53 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
 
 
 
+################################################################################
+
+
+# Tau-Tau Production Cross-Section Calculation at Given W
+def cs_tautau_w_condition_Hamzeh(W):
+    alpha = 1 / 137.0
+    hbarc2 = 0.389  # Conversion factor to pb
+    mtau = 1.77686  # Tau mass in GeV      mmuon = 0.105658   melectron = 0.511 * 1e-3      mtau = 1.77686
+    
+    if W < 2 * mtau:
+        return 0.0
+    beta = math.sqrt(1.0 - 4.0 * mtau**2 / W**2)
+    cross_section = (4 * math.pi * alpha**2 * hbarc2) / W**2 * beta * (
+        (3 - beta**4) / (2 * beta) * math.log((1 + beta) / (1 - beta)) - 2 + beta**2
+    ) * 1e9
+    return cross_section
+
+
+
+
+# Integrated Tau-Tau Production Cross-Section from W_0 to sqrt(s_cms)
+def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam, qmax2e, qmax2p):
+    s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
+    
+    try:
+        result, _ = integrate.quad(
+            lambda W: cs_tautau_w_condition_Hamzeh(W) * flux_el_yy_atW(W, eEbeam, pEbeam, qmax2e, qmax2p),
+            W0, np.sqrt(s_cms), epsrel=1e-4)
+    except integrate.IntegrationWarning:
+        print(f"Warning: Integration for tau-tau production cross-section did not converge for W_0={W0}")
+        result = 0.0
+    except Exception as e:
+        print(f"Error during integration for tau-tau production cross-section: {e}")
+        result = 0.0
+    return result
+
+
+################################################################################
+
+
+
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
 W_values = np.logspace(1.0, 3.0, 101)  # Range of W values from 10 GeV to 1000 GeV
+
+num_cores = 10  # Set this to the number of cores you want to use
 
 
 # Wrapper function for parallel processing
@@ -277,20 +333,36 @@ def wrapper_flux_el_yy_atW(W):
 
 # Parallel Calculation of the Photon-Photon Luminosity Spectrum
 if __name__ == "__main__":
-    num_cores = 100  # Set this to the number of cores you want to use
+ 
 
-    with Pool() as pool:
+    with Pool(processes=num_cores) as pool:
         luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
 
-    # Save results to a text file
-    with open("Jacobian_Krzysztof_Inelastic_Updated.txt", "w") as file:
+
+
+# Save results with None handling and formatted filename
+    filename = f"Inelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}.txt"
+
+    with open(filename, "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
         for W, S_yy in zip(W_values, luminosity_values):
+        # Use a default value if S_yy is None
+            S_yy = S_yy if S_yy is not None else 0.0
             file.write(f"{W:.6e}    {S_yy:.6e}\n")
+
+
 
     W_value = 10.0  # GeV
     luminosity_at_W10 = flux_el_yy_atW(W_value, eEbeam, pEbeam)
     print(f"Photon-Photon Luminosity Spectrum at W = {W_value} GeV: {luminosity_at_W10:.6e} GeV^-1")
+
+
+
+# Calculate Integrated Tau-Tau Production Cross-Section at W_0 = 10 GeV
+    W0_value = 10.0  # GeV
+    integrated_cross_section_value = integrated_tau_tau_cross_section(W0_value, eEbeam, pEbeam, q2emax, q2pmax)
+    print(f"Integrated Tau-Tau Production Cross-Section at W_0 = {W0_value} GeV: {integrated_cross_section_value:.6e} pb")
+
 
     # Plot the Results
     plt.figure(figsize=(10, 8))
@@ -311,7 +383,56 @@ if __name__ == "__main__":
     plt.grid(True, which="both", linestyle="--")
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
 
-    # Save the plot as a PDF and JPG
-    plt.savefig("Jacobian_Krzysztof_Inelastic_Updated.pdf")
-    plt.savefig("Jacobian_Krzysztof_Inelastic_Updated.jpg")
+# Save the plot as a PDF and JPG
+# Construct filenames for the plots including MN_max, q2emax, and q2pmax
+    plot_filename_pdf = f"Inelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}.pdf"
+    plot_filename_jpg = f"Inelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}.jpg"
+
+# Save the plot with dynamic filenames
+    plt.savefig(plot_filename_pdf)
+    plt.savefig(plot_filename_jpg)
+    
     plt.show()
+
+
+################################################################################
+
+    # Plot the Tau-Tau Production Cross-Section as a Function of W_0
+    W0_range = np.arange(10.0, 1001.0, 1.0)
+
+    with Pool(processes=num_cores) as pool:
+
+        cross_section_values = pool.starmap(integrated_tau_tau_cross_section, [(W0, eEbeam, pEbeam) for W0 in W0_range])
+
+    plt.figure(figsize=(10, 8))
+    plt.xlim(10.0, 1000.0)
+    plt.ylim(1.e-3, 1.e2)
+
+    plt.loglog(W0_range, cross_section_values, linestyle='solid', linewidth=2, label='Elastic')
+    plt.text(15, 2.e-2, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
+    plt.text(15, 1.e-2, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
+    
+    
+    plt.text(15, 5.e-3, f'Integrated Tau-Tau Cross-Section at W_0={W0_value} GeV = {integrated_cross_section_value:.2e} pb', fontsize=14, color='blue')
+
+    plt.xlabel(r"$W_0$ [GeV]", fontsize=18)
+    plt.ylabel(r"$\sigma_{\tau^+\tau^-}$ (W > $W_0$) [pb]", fontsize=18)
+    
+    plt.title("Integrated Tau-Tau Production Cross-Section at LHeC (Corrected)", fontsize=20)
+    plt.grid(True, which="both", linestyle="--")
+    plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
+
+
+# Define filenames with q2emax and q2pmax values included
+    filename_pdf = f"Integrated_inelastic_tau_tau_cross_section_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}.pdf"
+    filename_jpg = f"Integrated_inelastic_tau_tau_cross_section_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}.jpg"
+
+# Save the plot with the customized filenames
+    plt.savefig(filename_pdf)
+    plt.savefig(filename_jpg)
+    
+    plt.show()
+    
+################################################################################
+
+

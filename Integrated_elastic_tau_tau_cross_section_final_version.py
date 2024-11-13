@@ -1,5 +1,5 @@
 
-#  This code calculates the elastic Photon Luminosity Spectrum Syy
+#  This code calculates the elastic Photon Luminosity Spectrum Syy : using integrate.quad for the integration
 #  Final Version (with corrected W^2 = -Q2e + ye * yp * s ) to solve the high photon virtuality issues
 #  This code also calculates the integrated elastic tau tau cross section (ep -> e p tau^+ tau^-)
 #  Hamzeh Khanpour, Laurent Forthomme, and Krzysztof Piotrzkowski -- November 2024
