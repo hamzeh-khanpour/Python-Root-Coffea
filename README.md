@@ -1,4 +1,5 @@
-# Photon Luminosity Spectrum and tau-tau Production Cross-Section Calculation at the LHeC -- AGH University of Krakow
+# Photon Luminosity Spectrum and tau-tau Production Cross-Section Calculation at the LHeC
+# AGH University of Krakow
 
 ## Overview
 
