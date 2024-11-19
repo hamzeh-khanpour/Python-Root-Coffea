@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 
 
 # Load photon luminosity data from the text file
-data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_10_q2pmax_10_using_vegas.txt', comments='#')
+data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_50_q2emax_10_q2pmax_10_using_vegas.txt', comments='#')
 
 W_data = data[:, 0]
 S_yy_data = data[:, 1]

@@ -36,9 +36,9 @@ emass = 5.1099895e-4   # Electron mass in GeV
 pmass = 0.938272081    # Proton mass in GeV
 pi0mass = 0.1349768    # Pion mass in GeV
 
-q2emax = 10.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
-MN_max = 10.0  # Maximum MN in GeV
+q2emax = 50.0  # Maximum photon virtuality for electron in GeV^2
+q2pmax = 50.0  # Maximum photon virtuality for proton in GeV^2
+MN_max = 50.0  # Maximum MN in GeV
 
 
 #=========================================================================
@@ -216,7 +216,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
         lnQ2e = lnQ2e_min + x[1] * (lnQ2e_max - lnQ2e_min)
         Q2e = np.exp(lnQ2e)
 
-        MN_min, MN_max = pmass + pi0mass, 10.0           #  MN_max = 10.0
+        MN_min, MN_max = pmass + pi0mass, 50.0           #  MN_max = 10.0
         MN = MN_min + x[2] * (MN_max - MN_min)
 
         # Calculate the Jacobian based on W and current variables
@@ -354,7 +354,7 @@ if __name__ == "__main__":
 
 
 # Save results with None handling and formatted filename
-    filename = f"iInelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas.txt"
+    filename = f"Inelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas.txt"
 
     with open(filename, "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
