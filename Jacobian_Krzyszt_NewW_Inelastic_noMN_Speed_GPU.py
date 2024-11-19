@@ -1,6 +1,10 @@
 # Photon-Photon-Luminosity-Spectrum-Hamzeh_with_W_Parallel_Final_Expression_dlnq2_Jacobian
 
 import cupy as cp  # Use CuPy instead of NumPy for GPU acceleration
+
+print(cp.cuda.runtime.getDeviceCount())
+
+
 import math
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt

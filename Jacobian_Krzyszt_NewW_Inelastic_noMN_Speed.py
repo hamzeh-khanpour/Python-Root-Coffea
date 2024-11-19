@@ -213,6 +213,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
 #=========================================================================
 
 
+
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
@@ -234,7 +235,7 @@ if __name__ == "__main__":
         luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
 
 
-    with open("Jacobian_Krzysztof_Inelastic_Updated_noMN.txt", "w") as file:
+    with open("Jacobian_Krzysztof_Inelastic_Updated_noMN_Speed.txt", "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
         for W, S_yy in zip(W_values, luminosity_values):
             file.write(f"{W:.6e}    {S_yy:.6e}\n")

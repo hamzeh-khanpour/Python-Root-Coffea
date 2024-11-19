@@ -266,7 +266,7 @@ def wrapper_flux_el_yy_atW(W):
 
 # Parallel Calculation of the Photon-Photon Luminosity Spectrum
 if __name__ == "__main__":
-    num_cores = 100  # Set this to the number of cores you want to use
+    num_cores = 20  # Set this to the number of cores you want to use
 
     with Pool() as pool:
         luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
