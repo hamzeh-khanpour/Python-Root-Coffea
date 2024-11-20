@@ -354,7 +354,7 @@ if __name__ == "__main__":
 
 
 # Save results with None handling and formatted filename
-    filename = f"iInelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas.txt"
+    filename = f"Inelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas.txt"
 
     with open(filename, "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
