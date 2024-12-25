@@ -20,8 +20,8 @@ ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4  # Electron mass in GeV
 pmass = 0.938272081   # Proton mass in GeV
 
-q2emax = 50.0         # Maximum photon virtuality for electron in GeV^2
-q2pmax = 50.0         # Maximum photon virtuality for proton in GeV^2
+q2emax = 10.0         # Maximum photon virtuality for electron in GeV^2
+q2pmax = 10.0         # Maximum photon virtuality for proton in GeV^2
 
 # Elastic Form Factors (Dipole Approximation)
 def G_E(Q2):
