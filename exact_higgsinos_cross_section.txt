@@ -1,4 +1,4 @@
-# W_Value [GeV] Elastic [pb] Inelastic [pb] Inelastic [pb] Inelastic [pb]
+# W_Value [GeV] Elastic [pb] Inelastic_I [pb] Inelastic_II [pb] Inelastic_III [pb]
 1.00000000e+01	nan	nan	nan	nan
 1.01536600e+01	nan	nan	nan	nan
 1.03096800e+01	nan	nan	nan	nan

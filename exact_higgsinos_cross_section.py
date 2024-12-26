@@ -241,10 +241,12 @@ ax.set_ylabel(r"$\sigma_{{\rm ep}\to {\rm e}(\gamma\gamma\to\tilde{H}^+\tilde{H}
 ax.legend(title=r"$Q^2_e < 10^5$ GeV$^2$", loc="upper right")
 
 
+
 # Save output values
 output_data = np.column_stack((wv_el_trap, int_el, int_inel_I, int_inel_II, int_inel_III))
-header = "W_Value [GeV] Elastic [pb] Inelastic [pb] Inelastic [pb] Inelastic [pb]"
+header = "W_Value [GeV] Elastic [pb] Inelastic_I [pb] Inelastic_II [pb] Inelastic_III [pb]"
 np.savetxt("exact_higgsinos_cross_section.txt", output_data, header=header, fmt="%0.8e", delimiter="\t")
+
 
 
 
