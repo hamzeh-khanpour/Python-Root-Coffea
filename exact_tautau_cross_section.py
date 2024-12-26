@@ -33,8 +33,8 @@ plt.rcParams['legend.title_fontsize'] = 'x-large' '''
 
 
 # Load data from input files
-inelastic_data = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_3_q2emax_10_q2pmax_10_using_vegas.txt", skiprows=1)
-elastic_data = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_10_q2pmax_10_using_vegas.txt", skiprows=1)
+inelastic_data = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100_q2pmax_100_using_vegas.txt", skiprows=1)
+elastic_data = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100_q2pmax_100_using_vegas.txt", skiprows=1)
 
 # Extract W values and luminosity spectra
 wv_inelastic = inelastic_data[:, 0]
@@ -156,13 +156,13 @@ ax.set_ylim(1e-3, 1e3)
 
 # Plot elastic and inelastic cross-sections
 ax.loglog(wv_el_trap, int_el, label="Elastic", linestyle="solid", linewidth=2.5)
-ax.loglog(wv_inel_trap, int_inel, label=r"$M_N < 3$ GeV ($Q^2_p < 10$ GeV$^2$)", linestyle="dotted", linewidth=2.5)
+ax.loglog(wv_inel_trap, int_inel, label=r"$M_N < 10$ GeV ($Q^2_p < 10^2$ GeV$^2$)", linestyle="dotted", linewidth=2.5)
 
 
 # Add labels and legend
 ax.set_xlabel(r"$W_0$ [GeV]")
 ax.set_ylabel(r"$\sigma_{\mathrm{ep} \to \mathrm{e}(\gamma\gamma \to \tau^+ \tau^-)\mathrm{p}^{(*)}}$ ($W > W_0$) [pb]")
-ax.legend(title=r"$Q^2_e < 10$ GeV$^2$", loc="upper right")
+ax.legend(title=r"$Q^2_e < 10^2$ GeV$^2$", loc="upper right")
 
 
 # Save output values
@@ -173,8 +173,8 @@ np.savetxt("exact_tautau_cross_section.txt", output_data, header=header, fmt="%0
 
 
 # Save and show the plot
-plt.savefig("exact_tautau_cross_section_3_10_10.pdf")
-plt.savefig("exact_tautau_cross_section_3_10_10.jpg")
+plt.savefig("exact_tautau_cross_section_10_100_100.pdf")
+plt.savefig("exact_tautau_cross_section_10_100_100.jpg")
 plt.show()
 
 
