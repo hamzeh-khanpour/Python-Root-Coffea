@@ -1,3 +1,5 @@
+
+# The exact elastic/inelastic `integrated tau-tau production cross-section` for the `ep -> e(gamma gamma -> tau+ tau-)p(*)` process 
 # Final Version -- January 2025 -- Hamzeh Khanpour
 
 # ================================================================================
@@ -27,8 +29,29 @@ plt.rcParams["legend.fontsize"] = 15
 plt.rcParams['legend.title_fontsize'] = 'x-large' '''
 
 
+# ================================================================================
 
 
+# Load data from input files
+inelastic_data = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_3_q2emax_10_q2pmax_10_using_vegas.txt", skiprows=1)
+elastic_data = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_10_q2pmax_10_using_vegas.txt", skiprows=1)
+
+# Extract W values and luminosity spectra
+wv_inelastic = inelastic_data[:, 0]
+s_yy_inelastic = inelastic_data[:, 1]
+
+wv_elastic = elastic_data[:, 0]
+s_yy_elastic = elastic_data[:, 1]
+
+# Debugging input data
+print("Inelastic W values (first 10):", wv_inelastic[:10])
+print("Inelastic S_yy values (first 10):", s_yy_inelastic[:10])
+print("Elastic W values (first 10):", wv_elastic[:10])
+print("Elastic S_yy values (first 10):", s_yy_elastic[:10])
+
+
+
+# Function to calculate the tau-tau production cross-section
 ##################################################################
 
 def cs_tautau_w_condition_Hamzeh(wvalue):  # Eq.62 of Physics Reports 364 (2002) 359-450
@@ -70,11 +93,16 @@ def cs_tautau_w_condition_Krzysztof(wvalue):
     return cs
 
 
+
 ##################################################################
 
 
+# Debugging cross-section calculation
+print("Cross-section for inelastic W values (first 10):", cs_tautau_w_condition_Hamzeh(wv_inelastic)[:10])
+print("Cross-section for elastic W values (first 10):", cs_tautau_w_condition_Hamzeh(wv_elastic)[:10])
 
 
+# Integration using trapezoidal rule
 def trap_integ(wv, fluxv):
     wmin = np.zeros(len(wv) - 1)
     integ = np.zeros(len(wv) - 1)
@@ -96,74 +124,59 @@ def trap_integ(wv, fluxv):
 
 
 
+##################################################################
 
 
-
-sys.path.append('./values')
-
-from wgrid_3_10_10_exact_inelastic import *
-#from wgrid_10_10_exact_elastic import *
-
-# Validate index compatibility
-index = 3
-if index < len(wvalues) and index < len(inel) and index < len(elas):
-    wv = np.array(wvalues[index])
-    ie = np.array(inel[index])
-    el = np.array(elas[index])
-
-    # Adjust the number of points dynamically
-    n_points = min(len(wv), len(ie), len(el))
-
-    # Perform integration
-    wv1, int_inel = trap_integ(wv[:n_points], ie[:n_points])
-    
-    wv2, int_el = trap_integ(wv[:n_points], el[:n_points])
+# Perform integration for both grids
+wv_inel_trap, int_inel = trap_integ(wv_inelastic, s_yy_inelastic)
+wv_el_trap, int_el = trap_integ(wv_elastic, s_yy_elastic)
 
 
-fig, ax = plt.subplots(figsize = (8.0, 8.0))
+# Debugging integration results
+print("Integrated inelastic cross-section (partial):", int_inel[:10])
+print("Integrated elastic cross-section (partial):", int_el[:10])
+
+
+# Ensure all arrays are of the same length
+min_length = min(len(wv_el_trap), len(int_el), len(wv_inel_trap), len(int_inel))
+
+wv_el_trap = wv_el_trap[:min_length]
+int_el = int_el[:min_length]
+
+wv_inel_trap = wv_inel_trap[:min_length]
+int_inel = int_inel[:min_length]
+
+
+# Plotting
+fig, ax = plt.subplots(figsize=(8.0, 8.0))
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.12, top=0.95)
 ax.set_xlim(10.0, 1000.0)
-ax.set_ylim(1.e-3, 10.e2)
+ax.set_ylim(1e-3, 1e3)
 
 
-inel_label = ('$M_N<$ ${{{:g}}}$ GeV').format(inel[0]) + (' ($Q^2_p<$ ${{{:g}}}$ GeV$^2$)').format(inel[2])
-title_label = ('$Q^2_e<$ ${{{:g}}}^{{{:g}}}$ GeV$^2$').format(10,np.log10(inel[1]))
-plt.loglog(wv2[:303], int_el[:303], linestyle = 'solid',  linewidth=4,  label = 'Elastic')
-plt.loglog(wv1[:303], int_inel[:303], linestyle = 'dotted',  linewidth=4, label = inel_label)
-
-#plt.grid()
-
-plt.legend(title = title_label)
-
-#plt.grid()
+# Plot elastic and inelastic cross-sections
+ax.loglog(wv_el_trap, int_el, label="Elastic", linestyle="solid", linewidth=2.5)
+ax.loglog(wv_inel_trap, int_inel, label=r"$M_N < 3$ GeV ($Q^2_p < 10$ GeV$^2$)", linestyle="dotted", linewidth=2.5)
 
 
+# Add labels and legend
+ax.set_xlabel(r"$W_0$ [GeV]")
+ax.set_ylabel(r"$\sigma_{\mathrm{ep} \to \mathrm{e}(\gamma\gamma \to \tau^+ \tau^-)\mathrm{p}^{(*)}}$ ($W > W_0$) [pb]")
+ax.legend(title=r"$Q^2_e < 10$ GeV$^2$", loc="upper right")
 
 
-
-# Save the output values in a text file
-output_data = np.column_stack((wv2[:303], int_el[:303], int_inel[:303]))
-header = 'W_Value Elastic Inelastic'
-np.savetxt('output_values_tau.txt', output_data, header=header, fmt='%0.8e', delimiter='\t')
+# Save output values
+output_data = np.column_stack((wv_el_trap, int_el, int_inel))
+header = "W_Value [GeV] Elastic [pb] Inelastic [pb]"
+np.savetxt("exact_tautau_cross_section.txt", output_data, header=header, fmt="%0.8e", delimiter="\t")
 
 
 
-
-font1 = {'family':'serif','color':'black','size':24}
-font2 = {'family':'serif','color':'black','size':24}
-
-plt.xlabel("W$_0$ [GeV]")
-#plt.ylabel("$\sigma_{\\tau^+\\tau^-}$ (W > W$_0$) [pb]", fontdict=font2)
-plt.ylabel(r"$\sigma_{{\rm ep}\to {\rm e}(\gamma\gamma\to\tau^+\tau^-){\rm p}^{(\ast)}}$ (W > W$_0$) [pb]")
-
-
-
-
-plt.savefig("cs_tautau_JHEP_3_10_10.pdf")
-plt.savefig("cs_tautau_JHEP_3_10_10.jpg")
-
-
-
+# Save and show the plot
+plt.savefig("exact_tautau_cross_section_3_10_10.pdf")
+plt.savefig("exact_tautau_cross_section_3_10_10.jpg")
 plt.show()
 
+
+##################################################################
 
