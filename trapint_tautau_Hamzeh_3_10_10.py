@@ -1,165 +1,142 @@
-# Final Version -- December 2024 -- Hamzeh Khanpour
+# Final Version -- January 2025 -- Hamzeh Khanpour
 
 # ================================================================================
 
+# Imports
 import mplhep as hep
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
+# Use CMS style for plots
 hep.style.use("CMS")
-#plt.style.use(hep.style.ROOT)
 
-'''plt.rcParams["axes.linewidth"] = 1.8
-plt.rcParams["xtick.major.width"] = 1.8
-plt.rcParams["xtick.minor.width"] = 1.8
-plt.rcParams["ytick.major.width"] = 1.8
-plt.rcParams["ytick.minor.width"] = 1.8
+# ================================================================================
 
-plt.rcParams["xtick.direction"] = "in"
-plt.rcParams["ytick.direction"] = "in"
+# Function Definitions
 
-plt.rcParams["xtick.labelsize"] = 15
-plt.rcParams["ytick.labelsize"] = 15
-
-plt.rcParams["legend.fontsize"] = 15
-
-plt.rcParams['legend.title_fontsize'] = 'x-large' '''
-
-
-
-##################################################################
-
-def cs_tautau_w_condition_Hamzeh(wvalue):  # Eq.62 of Physics Reports 364 (2002) 359-450
-    re = 2.8179403262e-15 * 137.0 / 128.0
-    me = 0.510998950e-3
-    mtau = 1.77686
-    hbarc2 =  0.389
-    alpha2 = (1.0/137.0)*(1.0/137.0)
-
-    # Element-wise calculation of beta using np.where
-    beta = np.sqrt(np.where(1.0 - 4.0 * mtau * mtau / wvalue**2.0 >= 0.0, 1.0 - 4.0 * mtau * mtau / wvalue**2.0, np.nan))
-
-    # Element-wise calculation of cs using np.where
-    cs = np.where(wvalue > mtau, ( 4.0 * np.pi * alpha2 * hbarc2 ) / wvalue**2.0 * (beta) * \
-             ( (3.0 - (beta**4.0))/(2.0 * beta) * np.log((1.0 + beta)/(1.0 - beta)) - 2.0 + beta**2.0 ), 0.0) * 1e9
-
-    return cs
-
-
-##################################################################
-
-
-def cs_tautau_w_condition_Krzysztof(wvalue):
+def cs_tautau_w_condition_Hamzeh(wvalue):
+    """Calculate tau-tau cross-section as a function of W."""
     re = 2.8179403262e-15 * 137.0 / 128.0
     me = 0.510998950e-3
     mtau = 1.77686
     hbarc2 = 0.389
-    alpha2 = (1.0/137.0)*(1.0/137.0)
+    alpha2 = (1.0 / 137.0) ** 2
 
-    # Element-wise calculation of beta using np.where
-    beta = np.sqrt(np.where(1.0 - 4.0 * mtau * mtau / wvalue**2.0 >= 0, 1.0 - 4.0 * mtau * mtau / wvalue**2.0, np.nan))
+    # Calculate beta
+    beta = np.sqrt(np.maximum(0.0, 1.0 - 4.0 * mtau**2 / wvalue**2))
 
-    # Element-wise calculation of cs using np.where
-    cs =  4.0 * np.pi * hbarc2 * alpha2 / wvalue**2.0 * \
-         (2.0 * (1.0 + 4.0 * mtau**2.0 / wvalue**2.0 - 8.0 * mtau**4.0 / wvalue**4.0) * np.log(2.0 * wvalue / (mtau * (1.0 + beta))) -
-          beta * (1.0 + 4.0 * mtau**2.0 / wvalue**2.0)) * 1e9
-
-
+    # Compute cross-section
+    cs = np.where(
+        wvalue > mtau,
+        (4.0 * np.pi * alpha2 * hbarc2 / wvalue**2) * beta * (
+            (3.0 - beta**4) / (2.0 * beta) * np.log((1.0 + beta) / (1.0 - beta)) - 2.0 + beta**2),
+        0.0
+    ) * 1e9  # Convert to pb
     return cs
 
 
-##################################################################
-
-
-
-
 def trap_integ(wv, fluxv):
+    """Perform trapezoidal integration with tau-tau cross-section weighting."""
+    # Ensure the arrays have compatible lengths
+    if len(wv) != len(fluxv):
+        raise ValueError("Input arrays `wv` and `fluxv` must have the same length.")
+    
     wmin = np.zeros(len(wv) - 1)
     integ = np.zeros(len(wv) - 1)
 
-    for i in range(len(wv) - 2, -1, -1):
+    for i in range(len(wv) - 1):
         wvwid = wv[i + 1] - wv[i]
         cs_0 = cs_tautau_w_condition_Hamzeh(wv[i])
         cs_1 = cs_tautau_w_condition_Hamzeh(wv[i + 1])
         traparea = wvwid * 0.5 * (fluxv[i] * cs_0 + fluxv[i + 1] * cs_1)
         wmin[i] = wv[i]
-        if i == len(wv) - 2:
+        if i == 0:
             integ[i] = traparea
         else:
-            integ[i] = integ[i + 1] + traparea
+            integ[i] = integ[i - 1] + traparea
 
-    nanobarn = 1.e+40
+    return wmin, integ
 
-    return wmin, integ  # * nanobarn
+# ================================================================================
 
+# Main Script
 
-
-
-
-
+# Add the directory containing the data module to the Python path
 sys.path.append('./values')
 
-from wgrid_10_10_3_inelastic import *
+# Import photon luminosity data
+from wgrid_3_10_10_exact_inelastic import *
 
-wv = np.array(wvalues[3])
-ie = np.array(inel[3])
-el = np.array(elas[3])
+# Validate array lengths before accessing
+print("Validating data lengths...")
+print(f"Length of wvalueselas: {len(wvalueselas)}")
+print(f"Length of wvaluesinel: {len(wvaluesinel)}")
+print(f"Length of elas: {len(elas)}")
+print(f"Length of inel: {len(inel)}")
 
-wv1, int_inel = trap_integ(wv, ie)
-wv2, int_el = trap_integ(wv, el)
+# Check if index 3 is within range
+index = 3
+if len(wvalueselas) > index and len(wvaluesinel) > index and len(elas) > index and len(inel) > index:
+    wvelas = np.array(wvalueselas[index])
+    wvinel = np.array(wvaluesinel[index])
 
-fig, ax = plt.subplots(figsize = (8.0, 8.0))
-plt.subplots_adjust(left=0.15, right=0.95, bottom=0.12, top=0.95)
+    ie = np.array(inel[index])
+    el = np.array(elas[index])
 
+    # Perform integration for inelastic and elastic components
+    min_len_inel = min(len(wvinel), len(ie))  # Truncate to the smallest size
+    wvinel, ie = wvinel[:min_len_inel], ie[:min_len_inel]
 
-ax.set_xlim(10.0, 1000.0)
-ax.set_ylim(1.e-3, 10.e2)
+    min_len_el = min(len(wvelas), len(el))  # Truncate to the smallest size
+    wvelas, el = wvelas[:min_len_el], el[:min_len_el]
 
+    wv1, int_inel = trap_integ(wvinel, ie)
+    wv2, int_el = trap_integ(wvelas, el)
 
-inel_label = ('$M_N<$ ${{{:g}}}$ GeV').format(inel[0]) + (' ($Q^2_p<$ ${{{:g}}}$ GeV$^2$)').format(inel[2])
-title_label = ('$Q^2_e<$ ${{{:g}}}$ GeV$^2$').format(10,np.log10(inel[1]))
+    # Ensure output arrays have the same length for stacking
+    min_len_output = min(len(wv2), len(int_el), len(int_inel))
+    wv2, int_el, int_inel = wv2[:min_len_output], int_el[:min_len_output], int_inel[:min_len_output]
 
-# Adjust `303` dynamically based on the size of `wvalues[3]`
-n_points = len(wvalues[3])
+    # ================================================================================
 
-plt.loglog(wv2[:n_points], int_el[:n_points], linestyle = 'solid',  linewidth=4,  label = 'Elastic')
-plt.loglog(wv1[:n_points], int_inel[:n_points], linestyle = 'dotted',  linewidth=4, label = inel_label)
+    # Plotting
+    fig, ax = plt.subplots(figsize=(8.0, 8.0))
+    plt.subplots_adjust(left=0.15, right=0.95, bottom=0.12, top=0.95)
 
-#plt.grid()
+    # Set axis limits
+    ax.set_xlim(10.0, 1000.0)
+    ax.set_ylim(1.e-3, 10.e2)
 
-plt.legend(title = title_label)
+    # Labels and title
+    inel_label = (f"$M_N<$ {inel[0]:g} GeV") + (f" ($Q^2_p<$ {inel[2]:g} GeV$^2$)")
+    title_label = f"$Q^2_e<$ {10:g} GeV$^2$"
 
-#plt.grid()
+    plt.loglog(wv2, int_el, linestyle='solid', linewidth=4, label='Elastic')
+    plt.loglog(wv1, int_inel, linestyle='dotted', linewidth=4, label=inel_label)
 
+    # Legend
+    plt.legend(title=title_label)
 
+    # Axis labels
+    plt.xlabel("W$_0$ [GeV]", fontsize=24)
+    plt.ylabel(r"$\sigma_{{\rm ep}\to {\rm e}(\gamma\gamma\to\tau^+\tau^-){\rm p}^{(\ast)}}$ (W > W$_0$) [pb]", fontsize=24)
 
+    # Save the plot
+    plt.savefig("cs_tautau_30_10_10.pdf")
+    plt.savefig("cs_tautau_30_10_10.jpg")
 
+    # Display the plot
+    plt.show()
 
-# Save the output values in a text file
-output_data = np.column_stack((wv2[:n_points], int_el[:n_points], int_inel[:n_points]))
-header = 'W_Value Elastic Inelastic'
-np.savetxt('output_values_tau.txt', output_data, header=header, fmt='%0.8e', delimiter='\t')
+    # ================================================================================
 
+    # Save Results
 
+    # Save integration results to a text file
+    output_data = np.column_stack((wv2, int_el, int_inel))
+    header = 'W_Value Elastic Inelastic'
+    np.savetxt('output_values_tau.txt', output_data, header=header, fmt='%0.8e', delimiter='\t')
 
-
-
-
-
-font1 = {'family':'serif','color':'black','size':24}
-font2 = {'family':'serif','color':'black','size':24}
-
-plt.xlabel("W$_0$ [GeV]")
-#plt.ylabel("$\sigma_{\\tau^+\\tau^-}$ (W > W$_0$) [pb]", fontdict=font2)
-plt.ylabel(r"$\sigma_{{\rm ep}\to {\rm e}(\gamma\gamma\to\tau^+\tau^-){\rm p}^{(\ast)}}$ (W > W$_0$) [pb]")
-
-
-plt.savefig("cs_tautau_JHEP_3_10_10.pdf")
-plt.savefig("cs_tautau_JHEP_3_10_10.jpg")
-
-
-
-plt.show()
-
-
+else:
+    print(f"Error: Index {index} is out of range for the given data arrays.")

@@ -101,7 +101,8 @@ def trap_integ(wv, fluxv):
 
 sys.path.append('./values')
 
-from wgrid_3_10_10 import *
+from wgrid_3_10_10_exact_inelastic import *
+#from wgrid_10_10_exact_elastic import *
 
 # Validate index compatibility
 index = 3
@@ -115,6 +116,7 @@ if index < len(wvalues) and index < len(inel) and index < len(elas):
 
     # Perform integration
     wv1, int_inel = trap_integ(wv[:n_points], ie[:n_points])
+    
     wv2, int_el = trap_integ(wv[:n_points], el[:n_points])
 
 
