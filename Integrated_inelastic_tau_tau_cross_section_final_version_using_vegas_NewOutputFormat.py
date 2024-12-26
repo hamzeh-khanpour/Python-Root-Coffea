@@ -366,12 +366,12 @@ if __name__ == "__main__":
 
 
 # Save results to a Python script file in the desired format
-    filename_py = f"wgrid_{int(q2emax)}_{int(q2pmax)}_{int(MN_max)}_inelastic.py"
+    filename_py = f"wgrid_{int(MN_max)}_{int(q2emax)}_{int(q2pmax)}_exact_inelastic.py"
     with open(filename_py, "w") as file:
     # Writing W_values
-        file.write(f"wvalues = ({q2emax}, {q2pmax}, {W_values.tolist()})\n")
+        file.write(f"wvalues = ({MN_max}, {q2emax}, {q2pmax}, {W_values.tolist()})\n")
 
-        file.write(f"inel = ({q2emax}, {q2pmax}, {MN_max}, {[S_yy for S_yy in luminosity_values if S_yy is not None and S_yy != 0.0]})\n")
+        file.write(f"inel = ({MN_max}, {q2emax}, {q2pmax}, {[S_yy for S_yy in luminosity_values if S_yy is not None and S_yy != 0.0]})\n")
     # Writing inelastic luminosity values
 
 # Optional: Print a success message to confirm

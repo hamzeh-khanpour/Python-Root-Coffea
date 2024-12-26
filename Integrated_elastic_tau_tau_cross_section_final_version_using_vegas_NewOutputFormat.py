@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
 
 # Save results to a Python script file in the desired format
-    filename_py = f"wgrid_{int(q2emax)}_{int(q2pmax)}_elastic.py"
+    filename_py = f"wgrid_{int(q2emax)}_{int(q2pmax)}_exact_elastic.py"
     with open(filename_py, "w") as file:
     # Writing W_values
         file.write(f"wvalues = ({q2emax}, {q2pmax}, {W_values.tolist()})\n")

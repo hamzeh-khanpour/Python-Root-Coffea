@@ -101,7 +101,7 @@ def trap_integ(wv, fluxv):
 
 sys.path.append('./values')
 
-from wgrid_10_10_3_inelastic import *
+from wgrid_3_10_10 import *
 
 # Validate index compatibility
 index = 3
