@@ -1,5 +1,5 @@
 
-# The exact elastic/inelastic `integrated higgsinos production cross-section` for the `ep -> e(gamma gamma -> \tilde{H}^+\tilde{H}^-)p(*)` process 
+# The exact elastic/inelastic `integrated higgsinos production cross-section` for the `ep -> e(gamma gamma -> ZZ)p(*)` process 
 # Final Version -- January 2025 -- Hamzeh Khanpour
 
 # ================================================================================
@@ -68,96 +68,41 @@ print("Elastic S_yy values (first 10):", s_yy_elastic[:10])
 
 
 
-# Function to calculate the higgsinos production cross-section
+# Function to calculate the ZZ production cross-section
 ##################################################################
 
-def cs_higgsionos_w_condition_Hamzeh(wvalue):
+def cs_zz_w(wvalue):
+
     re = 2.8179403262e-15 * 137.0 / 128.0
     me = 0.510998950e-3
-    mhiggsionos = 100.0
+    mZ = 91.186
+
+    alpha = 1.0/137.0
+    hbarc =  197.327
     hbarc2 =  0.389
-    alpha2 = (1.0/137.0)*(1.0/137.0)
+    convert =  1.0 # hbarc2 * alpha * alpha * 1000000000.0
 
-    # Element-wise calculation of beta using np.where
-    beta = np.sqrt(np.where(1.0 - 4.0 * mhiggsionos * mhiggsionos / wvalue**2.0 >= 0, 1.0 - 4.0 * mhiggsionos * mhiggsionos / wvalue**2.0, np.nan))
-
-    # Element-wise calculation of cs using np.where
-    cs = np.where(wvalue > mhiggsionos, (4.0 * np.pi * alpha2 * hbarc2 ) / wvalue**2.0 * (beta) * \
-             ( (3.0 - (beta**4.0))/(2.0 * beta) * np.log((1.0+beta)/(1.0-beta)) - 2.0 + beta**2.0), 0.) * 1e9
-
+    if wvalue > 2.0 * mZ:
+ #       cs = re * re * me * me * 0.279061 * ( 1.0 - 8315.07/(wvalue*wvalue) )**12.9722
+        cs = convert * 0.25786903395035327/ \
+            (1.0 + 5.749069613832837e11/wvalue**6.0 + 6.914037195922673e7/wvalue**4.0 +
+            23.264122861948383/wvalue**2.0)**44.05927999125431
+    else:
+        cs = 0.0
     return cs
-
-
-##################################################################
-
-
-def cs_tautau_w(wvalue):
-    re = 2.8179403262e-15 * 137.0 / 128.0
-    me = 0.510998950e-3
-    mtau = 100.0
-    G = 4.2e-3
-    Gyy = (2.27e-3)*(4.2e-3)
-    hbarc2 =  0.389
-    alpha2 = (1.0/137.0)*(1.0/137.0)
-
-    cs = 4.0 * np.pi * hbarc2 * alpha2 / wvalue / wvalue \
-         * ((1.0 + 4.0*mtau*mtau/wvalue/wvalue)*np.log(wvalue * wvalue / mtau / mtau) - 1.0 - 2.0*mtau*mtau/wvalue/wvalue) * 1e9
-
-    return cs
-
-
-##################################################################
-
-
-def cs_higgsionos_w_condition(wvalue):
-    re = 2.8179403262e-15 * 137.0 / 128.0
-    me = 0.510998950e-3
-    mhiggsionos = 100.0
-    hbarc2 =  0.389
-    alpha2 = (1.0/137.0)*(1.0/137.0)
-
-    # Element-wise calculation of beta using np.where
-    beta = np.sqrt(np.where(1.0 - 4.0 * mhiggsionos * mhiggsionos / wvalue**2.0 >= 0, 1.0 - 4.0 * mhiggsionos * mhiggsionos / wvalue**2.0, np.nan))
-
-    # Element-wise calculation of cs using np.where
-    cs = np.where(wvalue > mhiggsionos, (4.0 * np.pi * alpha2 * hbarc2 ) / wvalue**2.0 *
-               ( (1.0 + 4.0*mhiggsionos**2.0/wvalue**2.0 - 8.0*mhiggsionos**4.0/wvalue**4.0) * np.log((1.0+beta)/(1.0-beta)) - beta* (1.0 + 4.0*mhiggsionos**2.0/wvalue**2.0)), 0.) * 1e9
-
-    return cs
-
-
-##################################################################
-
-
-def cs_higgsionos_w_condition_Krzysztof(wvalue):
-    re = 2.8179403262e-15 * 137.0 / 128.0
-    me = 0.510998950e-3
-    mhiggsionos = 100.0
-    hbarc2 = 0.389
-    alpha2 = (1.0/137.0)*(1.0/137.0)
-
-    # Element-wise calculation of beta using np.where
-    beta = np.sqrt(np.where(1.0 - 4.0 * mhiggsionos * mhiggsionos / wvalue**2.0 >= 0, 1.0 - 4.0 * mhiggsionos * mhiggsionos / wvalue**2.0, np.nan))
-
-    # Element-wise calculation of cs using np.where
-    cs = (4.0 * np.pi * hbarc2 * alpha2 ) / wvalue**2.0 * \
-         ( (1.0 + 4.0 * mhiggsionos**2.0 / wvalue**2.0 - 8.0 * mhiggsionos**4.0 / wvalue**4.0) * np.log((1.0 + beta) / (1.0 - beta)) -
-          beta * (1.0 + 4.0 * mhiggsionos**2.0 / wvalue**2.0) ) * 1e9
-
-
-    return cs
-
 
 ##################################################################
 
 
 # Debugging cross-section calculation
-print("Cross-section for inelastic W values (first 10):", cs_higgsionos_w_condition_Hamzeh(wv_inelastic_I)[:10])
-print("Cross-section for inelastic W values (first 10):", cs_higgsionos_w_condition_Hamzeh(wv_inelastic_II)[:10])
-print("Cross-section for inelastic W values (first 10):", cs_higgsionos_w_condition_Hamzeh(wv_inelastic_III)[:10])
+#print("Cross-section for inelastic W values (first 10):", cs_zz_w(wv_inelastic_I)[:10])
+#print("Cross-section for inelastic W values (first 10):", cs_zz_w(wv_inelastic_II)[:10])
+#print("Cross-section for inelastic W values (first 10):", cs_zz_w(wv_inelastic_III)[:10])
 
-print("Cross-section for elastic W values (first 10):", cs_higgsionos_w_condition_Hamzeh(wv_elastic)[:10])
+#print("Cross-section for elastic W values (first 10):", cs_zz_w(wv_elastic)[:10])
 
+
+##################################################################
 
 # Integration using trapezoidal rule
 def trap_integ(wv, fluxv):
@@ -166,8 +111,8 @@ def trap_integ(wv, fluxv):
 
     for i in range(len(wv) - 2, -1, -1):
         wvwid = wv[i + 1] - wv[i]
-        cs_0 = cs_higgsionos_w_condition_Hamzeh(wv[i])
-        cs_1 = cs_higgsionos_w_condition_Hamzeh(wv[i + 1])
+        cs_0 = cs_zz_w(wv[i])
+        cs_1 = cs_zz_w(wv[i + 1])
         traparea = wvwid * 0.5 * (fluxv[i] * cs_0 + fluxv[i + 1] * cs_1)
         wmin[i] = wv[i]
         if i == len(wv) - 2:
@@ -219,15 +164,8 @@ fig, ax = plt.subplots(figsize=(8.0, 9.0))
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.12, top=0.95)
 
 ax.set_xlim(200.0, 1000.0)
-ax.set_ylim(1.0e-7, 1.0e0)
+ax.set_ylim(1.e-6, 1.e-3)
 
-
-# Add additional information
-info_text = "LHeC"
-plt.text(0.2, 0.20, info_text, transform=ax.transAxes, ha='center', va='center', fontsize=25, color='black')
-
-info_text_2 = r"$M_{\tilde{H}}$ = 100 GeV"
-plt.text(0.2, 0.12, info_text_2, transform=ax.transAxes, ha='center', va='center', fontsize=25, color='black')
 
 
 # Plot elastic and inelastic cross-sections
@@ -238,7 +176,7 @@ ax.loglog(wv_inel_trap_III, int_inel_III, label=r"$M_N < 300$ GeV ($Q^2_p < 10^5
 
 # Add labels and legend
 ax.set_xlabel(r"$W_0$ [GeV]")
-ax.set_ylabel(r"$\sigma_{{\rm ep}\to {\rm e}(\gamma\gamma\to\tilde{H}^+\tilde{H}^-){\rm p}^{(\ast)}}$ (W > W$_0$) [pb]")
+ax.set_ylabel(r"$\sigma_{{\rm ep}\to {\rm e}(\gamma\gamma\to ZZ){\rm p}^{(\ast)}}$ (W > W$_0$) [pb]")
 ax.legend(title=r"$Q^2_e < 10^5$ GeV$^2$", loc="upper right")
 
 
@@ -246,14 +184,14 @@ ax.legend(title=r"$Q^2_e < 10^5$ GeV$^2$", loc="upper right")
 # Save output values
 output_data = np.column_stack((wv_el_trap, int_el, int_inel_I, int_inel_II, int_inel_III))
 header = "W_Value [GeV] Elastic [pb] Inelastic_I [pb] Inelastic_II [pb] Inelastic_III [pb]"
-np.savetxt("exact_higgsinos_cross_section.txt", output_data, header=header, fmt="%0.8e", delimiter="\t")
+np.savetxt("exact_zz_cross_section.txt", output_data, header=header, fmt="%0.8e", delimiter="\t")
 
 
 
 
 # Save and show the plot
-plt.savefig("exact_higgsinos_cross_section_JHEP.pdf")
-plt.savefig("exact_higgsinos_cross_section_JHEP.jpg")
+plt.savefig("exact_zz_cross_section_JHEP.pdf")
+plt.savefig("exact_zz_cross_section_JHEP.jpg")
 
 plt.show()
 
