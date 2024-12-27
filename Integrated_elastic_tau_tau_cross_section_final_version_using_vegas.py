@@ -65,7 +65,8 @@ def flux_y_electron(ye, lnQ2e):
 
 # Photon Flux from Proton (using lnQ2 as the integration variable)
 def flux_y_proton(yp):
-    if yp <= 0 or yp >= 1:
+    if yp <= 0 or yp >= 1:                     # Hamzeh tagged elastic   ==>  if (yp <= 0.01 or yp >= 0.20):
+        print('invalid yp value: ', yp)
         return 0.0
     qmin2p = qmin2(pmass, yp)
     if qmin2p <= 0:
@@ -101,11 +102,11 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
         
         # Compute necessary values
         yp_value = compute_yp(W, Q2e, ye, eEbeam, pEbeam)
-        if yp_value <= 0.01 or yp_value >= 0.20:              # Hamzeh tagged elastic   ==>  if (yp <= 0.01 or yp >= 0.20):
+        if yp_value <= 0.0 or yp_value >= 1.0:              
 #            print('invalid yp_value value: ', yp_value)
             return 0.0
         
-        
+
         # Calculate the Jacobian
         jacobian = compute_jacobian(ye, yp_value, Q2e, eEbeam, pEbeam)
         if jacobian == 0:
@@ -213,7 +214,7 @@ if __name__ == "__main__":
         luminosity_values = pool.starmap(flux_el_yy_atW, [(W, eEbeam, pEbeam) for W in W_values])
 
     # Save results to a text file with q2emax and q2pmax included in the filename
-    filename_txt = f"Elastic_Photon_Luminosity_Spectrum_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas_tagged_elastic.txt"
+    filename_txt = f"Elastic_Photon_Luminosity_Spectrum_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas.txt"
     with open(filename_txt, "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
         for W, S_yy in zip(W_values, luminosity_values):
