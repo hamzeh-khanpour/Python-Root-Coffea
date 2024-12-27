@@ -37,7 +37,7 @@ inelastic_data_I = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2e
 inelastic_data_II = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_50_q2emax_100000_q2pmax_1000_using_vegas.txt", skiprows=1)
 inelastic_data_III = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_300_q2emax_100000_q2pmax_100000_using_vegas.txt", skiprows=1)
 
-elastic_data = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_10_using_vegas.txt", skiprows=1)
+elastic_data = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_10_using_vegas_tagged_elastic.txt", skiprows=1)
 
 
 # Extract W values and luminosity spectra
@@ -213,7 +213,7 @@ plt.text(0.2, 0.12, info_text_2, transform=ax.transAxes, ha='center', va='center
 
 
 # Plot elastic and inelastic cross-sections
-ax.loglog(wv_el_trap, int_el, label="Elastic", linestyle="solid", linewidth=3)
+ax.loglog(wv_el_trap, int_el, label="tagged elastic", linestyle="solid", linewidth=3)
 ax.loglog(wv_inel_trap_I, int_inel_I, label=r"$M_N < 10$ GeV ($Q^2_p < 10$ GeV$^2$)", linestyle="dotted", linewidth=3)
 ax.loglog(wv_inel_trap_II, int_inel_II, label=r"$M_N < 50$ GeV ($Q^2_p < 10^3$ GeV$^2$)", linestyle="dashed", linewidth=3)
 ax.loglog(wv_inel_trap_III, int_inel_III, label=r"$M_N < 300$ GeV ($Q^2_p < 10^5$ GeV$^2$)", linestyle="dashdot", linewidth=3)
