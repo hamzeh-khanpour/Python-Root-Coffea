@@ -37,8 +37,8 @@ pmass = 0.938272081    # Proton mass in GeV
 pi0mass = 0.1349768    # Pion mass in GeV
 
 q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 10.0  # Maximum photon virtuality for proton in GeV^2
-MN_max = 10.0  # Maximum MN in GeV
+q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
+MN_max = 300.0  # Maximum MN in GeV
 
 
 #=========================================================================
@@ -75,7 +75,7 @@ def xP(xbj, Q2):
     return 1. / xPinv
 
 
-def xR(xbj, Q2):    
+def xR(xbj, Q2):
     if xbj == 0:
         print("xbj zero")
         return -1.
@@ -117,12 +117,12 @@ def cR(tval):
 
 
 def allm_f2P(xbj, Q2):
-    tval = tvalue(Q2) 
+    tval = tvalue(Q2)
     return cP(tval) * (xP(xbj, Q2) ** aP(tval)) * ((1. - xbj) ** bP(tval))
 
 
 def allm_f2R(xbj, Q2):
-    tval = tvalue(Q2) 
+    tval = tvalue(Q2)
     return cR(tval) * (xR(xbj, Q2) ** aR(tval)) * ((1. - xbj) ** bR(tval))
 
 
@@ -216,7 +216,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
         lnQ2e = lnQ2e_min + x[1] * (lnQ2e_max - lnQ2e_min)
         Q2e = np.exp(lnQ2e)
 
-        MN_min, MN_max = pmass + pi0mass, 10.0           #  MN_max = 10.0
+        MN_min, MN_max = pmass + pi0mass, 300.0           #  MN_max = 10.0
         MN = MN_min + x[2] * (MN_max - MN_min)
 
         # Calculate the Jacobian based on W and current variables
@@ -258,7 +258,7 @@ def flux_el_yy_atW(W, eEbeam, pEbeam):
     integrator = vegas.Integrator([[0, 1], [0, 1], [0, 1], [0, 1]])
 
     # Training phase
-    integrator(vegas_integrand, nitn=5, neval=1000) 
+    integrator(vegas_integrand, nitn=5, neval=1000)
 
     # Final evaluation
     result = integrator(vegas_integrand, nitn=10, neval=10000)
@@ -301,14 +301,14 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
     def vegas_integrand(x):
         # Scale x from [0, 1] to [W0, upper_limit]
         W = W0 + x[0] * (upper_limit - W0)
-        
+
         # Calculate the cross-section and luminosity spectrum
         tau_tau_cross_section = cs_tautau_w_condition_Hamzeh(W)
         luminosity_spectrum = flux_el_yy_atW(W, eEbeam, pEbeam)
-        
+
         if luminosity_spectrum is None:
             luminosity_spectrum = 0.0  # Handle NoneType if vegas fails
-        
+
         # Return the product and scale by volume element (upper_limit - W0)
         return tau_tau_cross_section * luminosity_spectrum * (upper_limit - W0)
 
@@ -316,7 +316,7 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
     integrator = vegas.Integrator([[0, 1]])
 
     # Training phase
-    integrator(vegas_integrand, nitn=5, neval=1000) 
+    integrator(vegas_integrand, nitn=5, neval=1000)
 
     # Final evaluation
     result = integrator(vegas_integrand, nitn=10, neval=10000)
@@ -334,9 +334,9 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 
 
 # Parameters
-eEbeam = 50.0  # Electron beam energy in GeV
+eEbeam = 20.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
-W_values = np.logspace(1.0, 3.0, 303)  # Range of W values from 10 GeV to 1000 GeV 
+W_values = np.logspace(1.0, 2.80, 303)  # Range of W values from 10 GeV to 1000 GeV
 
 num_cores = 10  # Set this to the number of cores you want to use
 
@@ -347,14 +347,14 @@ def wrapper_flux_el_yy_atW(W):
 
 # Parallel Calculation of the Photon-Photon Luminosity Spectrum
 if __name__ == "__main__":
-    
+
 
     with Pool(processes=num_cores) as pool:
         luminosity_values = pool.map(wrapper_flux_el_yy_atW, W_values)
 
 
 # Save results with None handling and formatted filename
-    filename = f"Inelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas.txt"
+    filename = f"Inelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas_LHeC750GeV.txt"
 
     with open(filename, "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
@@ -423,13 +423,13 @@ if __name__ == "__main__":
     plt.loglog(W0_range, cross_section_values, linestyle='solid', linewidth=2, label='Elastic')
     plt.text(15, 2.e-2, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
     plt.text(15, 1.e-2, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
-    
-    
+
+
     plt.text(15, 5.e-3, f'Integrated Tau-Tau Cross-Section at W_0={W0_value} GeV = {integrated_cross_section_value:.2e} pb', fontsize=14, color='blue')
 
     plt.xlabel(r"$W_0$ [GeV]", fontsize=18)
     plt.ylabel(r"$\sigma_{\tau^+\tau^-}$ (W > $W_0$) [pb]", fontsize=18)
-    
+
     plt.title("Integrated Tau-Tau Production Cross-Section at LHeC (Corrected)", fontsize=20)
     plt.grid(True, which="both", linestyle="--")
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
@@ -442,7 +442,7 @@ if __name__ == "__main__":
 # Save the plot with the customized filenames
     plt.savefig(filename_pdf)
     plt.savefig(filename_jpg)
-    
+
     plt.show()
 
 
