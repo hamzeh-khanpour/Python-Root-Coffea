@@ -188,7 +188,7 @@ fig, ax = plt.subplots(figsize=(8.0, 9.0))
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.12, top=0.95)
 
 ax.set_xlim(161.0, 1000.0)
-ax.set_ylim(1.0e-6, 1.0e1)
+ax.set_ylim(1.0e-6, 1.0e0)
 
 
 

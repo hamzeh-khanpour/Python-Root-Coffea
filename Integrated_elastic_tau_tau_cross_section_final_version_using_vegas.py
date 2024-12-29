@@ -198,7 +198,7 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 # Parameters
 eEbeam = 20.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
-W_values = np.logspace(1.0, 2.80, 303)  # Range of W values from 10 GeV to 1000 GeV
+W_values = np.logspace(1.0, 2.8740, 404)  # Range of W values from 10 GeV to 1000 GeV
 
 num_cores = 10  # Set this to the number of cores you want to use
 
@@ -262,7 +262,7 @@ if __name__ == "__main__":
 
     # Plot the Tau-Tau Production Cross-Section as a Function of W_0
     W0_range = np.arange(10.0, 1001.0, 1.0)
-    
+
     with Pool(processes=num_cores) as pool:
         cross_section_values = pool.starmap(integrated_tau_tau_cross_section, [(W0, eEbeam, pEbeam) for W0 in W0_range])
 
@@ -273,13 +273,13 @@ if __name__ == "__main__":
     plt.loglog(W0_range, cross_section_values, linestyle='solid', linewidth=2, label='Elastic')
     plt.text(15, 2.e-2, f'q2emax = {q2emax:.1e} GeV^2', fontsize=14, color='blue')
     plt.text(15, 1.e-2, f'q2pmax = {q2pmax:.1e} GeV^2', fontsize=14, color='blue')
-    
-    
+
+
     plt.text(15, 5.e-3, f'Integrated Tau-Tau Cross-Section at W_0={W0_value} GeV = {integrated_cross_section_value:.2e} pb', fontsize=14, color='blue')
 
     plt.xlabel(r"$W_0$ [GeV]", fontsize=18)
     plt.ylabel(r"$\sigma_{\tau^+\tau^-}$ (W > $W_0$) [pb]", fontsize=18)
-    
+
     plt.title("Integrated Tau-Tau Production Cross-Section at LHeC (Corrected)", fontsize=20)
     plt.grid(True, which="both", linestyle="--")
     plt.legend(title=r'$Q^2_e < 10^5 \, \mathrm{GeV}^2, \, Q^2_p < 10^5 \, \mathrm{GeV}^2$', fontsize=14)
@@ -292,7 +292,7 @@ if __name__ == "__main__":
 # Save the plot with the customized filenames
     plt.savefig(filename_pdf)
     plt.savefig(filename_jpg)
-    
+
     plt.show()
 
 
