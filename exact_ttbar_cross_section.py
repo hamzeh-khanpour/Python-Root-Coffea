@@ -188,7 +188,7 @@ np.savetxt("exact_ttbar_cross_section.txt", output_data, header=header, fmt="%0.
 
 # Save and show the plot
 plt.savefig("exact_ttbar_cross_section_JHEP.pdf")
-plt.savefig("exact_ttbar_cross_section_JHEP.jpg")
+#plt.savefig("exact_ttbar_cross_section_JHEP.jpg")
 
 plt.show()
 

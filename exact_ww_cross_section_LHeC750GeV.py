@@ -32,12 +32,18 @@ plt.rcParams['legend.title_fontsize'] = 'x-large' '''
 # ================================================================================
 
 
+# Define the folder containing the .txt files
+folder = "Grids/"
+
+
 # Load data from input files
 inelastic_data_I = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_10_using_vegas_LHeC750GeV.txt", skiprows=1)
 inelastic_data_II = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_50_q2emax_100000_q2pmax_1000_using_vegas_LHeC750GeV.txt", skiprows=1)
 inelastic_data_III = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_300_q2emax_100000_q2pmax_100000_using_vegas_LHeC750GeV.txt", skiprows=1)
 
 elastic_data = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_10_using_vegas_tagged_elastic_LHeC750GeV.txt", skiprows=1)
+
+
 
 
 # Extract W values and luminosity spectra
@@ -188,7 +194,7 @@ fig, ax = plt.subplots(figsize=(8.0, 9.0))
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.12, top=0.95)
 
 ax.set_xlim(161.0, 1000.0)
-ax.set_ylim(1.0e-6, 1.0e0)
+ax.set_ylim(1.0e-5, 1.0e0)
 
 
 
@@ -208,17 +214,18 @@ ax.legend(title=r"$Q^2_e < 10^5$ GeV$^2$", loc="upper right")
 # Save output values
 output_data = np.column_stack((wv_el_trap, int_el, int_inel_I, int_inel_II, int_inel_III))
 header = "W_Value [GeV] Elastic [pb] Inelastic_I [pb] Inelastic_II [pb] Inelastic_III [pb]"
-np.savetxt("exact_ww_cross_section_LHeC750GeV.txt", output_data, header=header, fmt="%0.8e", delimiter="\t")
+np.savetxt("exact_ww_cross_section.txt", output_data, header=header, fmt="%0.8e", delimiter="\t")
+
 
 
 
 
 # Add additional information
 info_text = "LHeC@750 GeV"
-plt.text(0.35, 0.11, info_text, transform=ax.transAxes, ha='center', va='center', fontsize=25, color='blue', fontweight='bold')
+plt.text(0.64, 0.57, info_text, transform=ax.transAxes, ha='center', va='center', fontsize=25, color='blue', fontweight='bold')
 
 info_text_2 = r"$E_e$=20 GeV; $E_p$=7000 GeV"
-plt.text(0.35, 0.05, info_text_2, transform=ax.transAxes, ha='center', va='center', fontsize=25, color='blue', fontweight='bold')
+plt.text(0.64, 0.52, info_text_2, transform=ax.transAxes, ha='center', va='center', fontsize=25, color='blue', fontweight='bold')
 
 
 
@@ -226,7 +233,7 @@ plt.text(0.35, 0.05, info_text_2, transform=ax.transAxes, ha='center', va='cente
 
 # Save and show the plot
 plt.savefig("exact_ww_cross_section_LHeC750GeV_JHEP.pdf")
-plt.savefig("exact_ww_cross_section_LHeC750GeV_JHEP.jpg")
+#plt.savefig("exact_ww_cross_section_LHeC750GeV_JHEP.jpg")
 
 plt.show()
 

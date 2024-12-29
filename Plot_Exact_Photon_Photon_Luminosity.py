@@ -93,17 +93,9 @@ ax.legend(title=r"$Q^2_e < 10^5$ GeV$^2$", loc="upper right")
 
 
 
-# Add additional information
-#info_text = "FCC-he"
-#plt.text(0.35, 0.11, info_text, transform=ax.transAxes, ha='center', va='center', fontsize=25, color='blue', fontweight='bold')
-
-#info_text_2 = r"$E_e$=60 GeV; $E_p$=50000 GeV"
-#plt.text(0.35, 0.05, info_text_2, transform=ax.transAxes, ha='center', va='center', fontsize=25, color='blue', fontweight='bold')
-
-
 # Save the plot
 plt.savefig("Exact_Photon_Luminosity_Spectrum_JHEP.pdf")
-plt.savefig("Exact_Photon_Luminosity_Spectrum_JHEP.jpg")
+#plt.savefig("Exact_Photon_Luminosity_Spectrum_JHEP.jpg")
 
 # Show the plot
 plt.show()

@@ -154,7 +154,7 @@ plt.text(0.35, 0.05, info_text_2, transform=ax.transAxes, ha='center', va='cente
 
 # Save and show the plot
 plt.savefig("Exact_Integrated_Photon_Luminosity_Spectrum_LHeC750GeV_JHEP.pdf")
-plt.savefig("Exact_Integrated_Photon_Luminosity_Spectrum_LHeC750GeV_JHEP.jpg")
+#plt.savefig("Exact_Integrated_Photon_Luminosity_Spectrum_LHeC750GeV_JHEP.jpg")
 
 plt.show()
 

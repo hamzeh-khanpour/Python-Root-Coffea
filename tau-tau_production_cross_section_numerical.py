@@ -100,7 +100,7 @@ plt.title("Inelastic Tau-Tau Production Cross-Section (with corrected W)", fonts
 plt.grid(True, which="both", linestyle="--")
 
 plt.savefig("integrated_tau_tau_cross_section_numerical.pdf")
-plt.savefig("integrated_tau_tau_cross_section_numerical.jpg")
+#plt.savefig("integrated_tau_tau_cross_section_numerical.jpg")
 
 plt.show()
     

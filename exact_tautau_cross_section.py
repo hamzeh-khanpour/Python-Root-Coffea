@@ -150,13 +150,14 @@ int_inel = int_inel[:min_length]
 # Plotting
 fig, ax = plt.subplots(figsize=(8.0, 9.0))
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.12, top=0.95)
+
 ax.set_xlim(10.0, 1000.0)
 ax.set_ylim(1e-3, 1e3)
 
 
 # Plot elastic and inelastic cross-sections
-ax.loglog(wv_el_trap, int_el, label="Elastic", linestyle="solid", linewidth=3)
-ax.loglog(wv_inel_trap, int_inel, label=r"$M_N < 3$ GeV ($Q^2_p < 10$ GeV$^2$)", linestyle="dotted", linewidth=3)
+ax.loglog(wv_el_trap, int_el, label="Elastic", linestyle="solid", linewidth=4)
+ax.loglog(wv_inel_trap, int_inel, label=r"$M_N < 3$ GeV ($Q^2_p < 10$ GeV$^2$)", linestyle="dotted", linewidth=4)
 
 
 # Add labels and legend
@@ -174,7 +175,7 @@ np.savetxt("exact_tautau_cross_section_3_10_10.txt", output_data, header=header,
 
 # Save and show the plot
 plt.savefig("exact_tautau_cross_section_3_10_10_JHEP.pdf")
-plt.savefig("exact_tautau_cross_section_3_10_10_JHEP.jpg")
+#plt.savefig("exact_tautau_cross_section_3_10_10_JHEP.jpg")
 
 plt.show()
 

@@ -198,7 +198,7 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 # Parameters
 eEbeam = 20.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
-W_values = np.logspace(1.0, 2.8740, 404)  # Range of W values from 10 GeV to 1000 GeV
+W_values = np.logspace(1.0, 2.874, 404)  # Range of W values from 10 GeV to 1000 GeV
 
 num_cores = 10  # Set this to the number of cores you want to use
 

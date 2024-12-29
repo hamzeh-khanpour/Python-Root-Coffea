@@ -103,7 +103,7 @@ plt.text(0.35, 0.05, info_text_2, transform=ax.transAxes, ha='center', va='cente
 
 # Save the plot
 plt.savefig("Exact_Photon_Luminosity_Spectrum_LHeC750GeV_JHEP.pdf")
-plt.savefig("Exact_Photon_Luminosity_Spectrum_LHeC750GeV_JHEP.jpg")
+#plt.savefig("Exact_Photon_Luminosity_Spectrum_LHeC750GeV_JHEP.jpg")
 
 # Show the plot
 plt.show()

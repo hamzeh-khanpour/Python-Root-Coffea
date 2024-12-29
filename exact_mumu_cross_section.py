@@ -156,8 +156,8 @@ ax.set_ylim(1e-3, 1e3)
 
 
 # Plot elastic and inelastic cross-sections
-ax.loglog(wv_el_trap, int_el, label="Elastic", linestyle="solid", linewidth=3)
-ax.loglog(wv_inel_trap, int_inel, label=r"$M_N < 3$ GeV ($Q^2_p < 50$ GeV$^2$)", linestyle="dotted", linewidth=3)
+ax.loglog(wv_el_trap, int_el, label="Elastic", linestyle="solid", linewidth=4)
+ax.loglog(wv_inel_trap, int_inel, label=r"$M_N < 3$ GeV ($Q^2_p < 50$ GeV$^2$)", linestyle="dotted", linewidth=4)
 
 
 # Add labels and legend
@@ -175,7 +175,7 @@ np.savetxt("exact_mumu_cross_section_3_50_50.txt", output_data, header=header, f
 
 # Save and show the plot
 plt.savefig("exact_mumu_cross_section_3_50_50_JHEP.pdf")
-plt.savefig("exact_mumu_cross_section_3_50_50_JHEP.jpg")
+#plt.savefig("exact_mumu_cross_section_3_50_50_JHEP.jpg")
 
 plt.show()
 
