@@ -162,10 +162,8 @@ wv_el_trap, int_el = trap_integ(wv_elastic, s_yy_elastic)
 
 
 # Debugging integration results
-print("Integrated inelastic cross-section (partial):", int_inel_I[:1000])
-print("Integrated inelastic cross-section (partial):", int_inel_II[:1000])
-print("Integrated inelastic cross-section (partial):", int_inel_III[:1000])
-print("Integrated elastic cross-section (partial):", int_el[:1000])
+print("Integrated inelastic cross-section (partial):", int_inel_I[:200])
+print("Integrated elastic cross-section (partial):", int_el[:200])
 
 
 # Ensure all arrays are of the same length
@@ -207,6 +205,13 @@ ax.legend(title=r"$Q^2_e < 10^5$ GeV$^2$", loc="upper right")
 
 
 
+# Save output values
+output_data = np.column_stack((wv_el_trap, int_el, int_inel_I, int_inel_II, int_inel_III))
+header = "W_Value [GeV] Elastic [pb] Inelastic_I [pb] Inelastic_II [pb] Inelastic_III [pb]"
+np.savetxt("exact_ww_cross_section_LHeC750GeV.txt", output_data, header=header, fmt="%0.8e", delimiter="\t")
+
+
+
 
 # Add additional information
 info_text = "LHeC@750 GeV"
@@ -217,15 +222,6 @@ plt.text(0.35, 0.05, info_text_2, transform=ax.transAxes, ha='center', va='cente
 
 
 
-
-# Save output values
-output_data = np.column_stack((wv_el_trap, int_el, int_inel_I, int_inel_II, int_inel_III))
-header = "W_Value [GeV] Elastic [pb] Inelastic_I [pb] Inelastic_II [pb] Inelastic_III [pb]"
-np.savetxt("exact_ww_cross_section_LHeC750GeV.txt", output_data, header=header, fmt="%0.8e", delimiter="\t")
-
-
-#data = np.loadtxt("exact_ww_cross_section_LHeC750GeV.txt", skiprows=1)
-#print(data.shape)  # Should match expected rows and columns.
 
 
 # Save and show the plot
