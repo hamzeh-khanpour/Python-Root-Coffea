@@ -162,8 +162,10 @@ wv_el_trap, int_el = trap_integ(wv_elastic, s_yy_elastic)
 
 
 # Debugging integration results
-print("Integrated inelastic cross-section (partial):", int_inel_I[:200])
-print("Integrated elastic cross-section (partial):", int_el[:200])
+print("Integrated inelastic cross-section (partial):", int_inel_I[:1000])
+print("Integrated inelastic cross-section (partial):", int_inel_II[:1000])
+print("Integrated inelastic cross-section (partial):", int_inel_III[:1000])
+print("Integrated elastic cross-section (partial):", int_el[:1000])
 
 
 # Ensure all arrays are of the same length
@@ -222,6 +224,8 @@ header = "W_Value [GeV] Elastic [pb] Inelastic_I [pb] Inelastic_II [pb] Inelasti
 np.savetxt("exact_ww_cross_section_LHeC750GeV.txt", output_data, header=header, fmt="%0.8e", delimiter="\t")
 
 
+#data = np.loadtxt("exact_ww_cross_section_LHeC750GeV.txt", skiprows=1)
+#print(data.shape)  # Should match expected rows and columns.
 
 
 # Save and show the plot
