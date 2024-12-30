@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 
 
 # Load photon luminosity data from the text file
-data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_10_q2pmax_10_using_vegas.txt', comments='#')
+data = np.loadtxt('Elastic_Photon_Luminosity_Spectrum_q2emax_10_q2pmax_10_using_vegas.txt', comments='#')
 
 W_data = data[:, 0]
 S_yy_data = data[:, 1]
@@ -30,7 +30,7 @@ S_yy_interp = interp1d(W_data, S_yy_data, kind='linear', bounds_error=False, fil
 def cs_tautau_w_condition_Hamzeh(W):
     alpha = 1 / 137.0
     hbarc2 = 0.389  # Conversion factor to pb
-    mtau = 1.77686  # Tau mass in GeV
+    mtau = 1.77686  # tau mass in GeV 
 
     if W < 2 * mtau:
         return 0.0
@@ -82,27 +82,6 @@ W0_value = 10.0  # GeV
 integrated_cross_section_value = integrated_tau_tau_cross_section(W0_value, eEbeam, pEbeam)
 print(f"Integrated inelastic Tau-Tau Production Cross-Section at W_0 = {W0_value} GeV: {integrated_cross_section_value:.6e} pb")
 
-# Plot the Tau-Tau Production Cross-Section as a Function of W_0
-W0_range = np.arange(10.0, 1001.0, 1.0)
-cross_section_values = [integrated_tau_tau_cross_section(W0, eEbeam, pEbeam) for W0 in W0_range]
-
-plt.figure(figsize=(10, 8))
-plt.xlim(10.0, 1000.0)
-plt.ylim(1.e-3, 1.e2)
-
-plt.loglog(W0_range, cross_section_values, linestyle='solid', linewidth=2, label='Inelastic')
-plt.text(15, 5.e-3, f'Integrated Inelastic Tau-Tau Cross-Section at W_0={W0_value} GeV = {integrated_cross_section_value:.2e} pb', fontsize=14, color='blue')
-
-plt.xlabel(r"$W_0$ [GeV]", fontsize=18)
-plt.ylabel(r"$\sigma_{{\rm ep}\to {\rm e}(\gamma\gamma\to\tau^+\tau^-){\rm p}^{(\ast)}}$ (W > W$_0$) [pb]", fontsize=18)
-
-plt.title("Inelastic Tau-Tau Production Cross-Section (with corrected W)", fontsize=20)
-plt.grid(True, which="both", linestyle="--")
-
-plt.savefig("integrated_tau_tau_cross_section_numerical.pdf")
-#plt.savefig("integrated_tau_tau_cross_section_numerical.jpg")
-
-plt.show()
     
 ################################################################################
 
