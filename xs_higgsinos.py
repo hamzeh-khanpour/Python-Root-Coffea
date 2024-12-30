@@ -16,10 +16,10 @@ from scipy.interpolate import interp1d
 
 
 # Load photon luminosity data from the text file
-data = np.loadtxt('Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_10_using_vegas_tagged_elastic.txt', comments='#')
-#data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_10_using_vegas.txt', comments='#')
-#data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_50_q2emax_100000_q2pmax_1000_using_vegas.txt', comments='#')
-#data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_300_q2emax_100000_q2pmax_100000_using_vegas.txt', comments='#')
+#data = np.loadtxt('Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_10_using_vegas_FCC_he.txt', comments='#')
+#data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_10_using_vegas_FCC_he.txt', comments='#')
+#data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_50_q2emax_100000_q2pmax_1000_using_vegas_FCC_he.txt', comments='#')
+data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_300_q2emax_100000_q2pmax_100000_using_vegas_FCC_he.txt', comments='#')
 
 W_data = data[:, 0]
 S_yy_data = data[:, 1]
@@ -77,8 +77,8 @@ def integrated_higgsinos_cross_section(W0, eEbeam, pEbeam):
 
 
 # Parameters
-eEbeam = 50.0  # Electron beam energy in GeV
-pEbeam = 7000.0  # Proton beam energy in GeV
+eEbeam = 60.0  # Electron beam energy in GeV
+pEbeam = 50000.0  # Proton beam energy in GeV
 mhiggsino = 100.0  # higgsino mass in GeV 
 W0_value = 2*mhiggsino  # GeV
 
