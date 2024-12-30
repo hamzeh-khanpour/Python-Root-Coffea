@@ -1,6 +1,6 @@
-# The `integrated_sleptons_cross_section` function computes the integrated mu-mu production cross-section 
+# The `integrated_sleptons_cross_section` function computes the integrated sleptons production cross-section 
 # for a given threshold energy `W0` and electron/proton beam energies `eEbeam` and `pEbeam`.
-#   - It defines an integrand combining mu-mu cross-section and the interpolated S_yy.
+#   - It defines an integrand combining sleptons cross-section and the interpolated S_yy.
 #   - If S_yy is zero at a given W, it skips that W value to avoid unnecessary computations.
 #   - The result is integrated over W from W0 up to the maximum value set by `sqrt(s_cms)`.
 #   - Integration warnings are caught, ensuring stable results.
@@ -29,7 +29,7 @@ S_yy_data = data[:, 1]
 S_yy_interp = interp1d(W_data, S_yy_data, kind='linear', bounds_error=False, fill_value=0.0)
 
 
-# mu-mu Production Cross-Section Calculation at Given W
+# sleptons Production Cross-Section Calculation at Given W
 def cs_sleptons_w_condition(wvalue):
     re = 2.8179403262e-15 * 137.0 / 128.0
     me = 0.510998950e-3
@@ -48,12 +48,12 @@ def cs_sleptons_w_condition(wvalue):
 
 
 
-# Integrated mu-mu Production Cross-Section from W_0 to sqrt(s_cms)
+# Integrated sleptons Production Cross-Section from W_0 to sqrt(s_cms)
 def integrated_sleptons_cross_section(W0, eEbeam, pEbeam):
     s_cms = 4.0 * eEbeam * pEbeam  # Center-of-mass energy squared
 
     def integrand(W):
-        # Get the mu-mu cross-section and S_yy value
+        # Get the sleptons cross-section and S_yy value
         sleptons_cross_section = cs_sleptons_w_condition(W)
         S_yy_value = S_yy_interp(W)
 
@@ -62,7 +62,7 @@ def integrated_sleptons_cross_section(W0, eEbeam, pEbeam):
             #print(f"Skipping W={W} due to S_yy=0")
             return 0.0
 
-        return sleptons_cross_section * S_yy_value     # to calculates the integrated mu-mu cross-section
+        return sleptons_cross_section * S_yy_value     # to calculates the integrated sleptons cross-section
 
     try:
         result, _ = integrate.quad(integrand, W0, np.sqrt(s_cms), epsrel=1e-4)
