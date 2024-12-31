@@ -1,86 +1,112 @@
 import numpy as np
-import vegas
+import math
+import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 
 # Constants in GeV
-ALPHA2PI = 7.2973525693e-3 / np.pi  # Fine structure constant divided by pi
-emass = 0.000511  # Electron mass in GeV
-pmass = 0.938272  # Proton mass in GeV
-q2emax = 100000.0  # Maximum photon virtuality for electron in GeV^2
-q2pmax = 100000.0  # Maximum photon virtuality for proton in GeV^2
-hbarc2 = 0.389  # Conversion factor for cross-section to pb
+ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
+emass = 5.1099895e-4  # Electron mass in GeV
+pmass = 0.938272081   # Proton mass in GeV
+q2emax = 10.0         # Maximum photon virtuality for electron in GeV^2
+q2pmax = 10.0         # Maximum photon virtuality for proton in GeV^2
+mNmax = 3.0           # Maximum mass of nuclear system in GeV
+W0 = 10.0             # Minimum W value in GeV
+eEbeam = 20.0         # Electron beam energy in GeV
+pEbeam = 7000.0       # Proton beam energy in GeV
 
-# Sigma_{gamma_gamma} for tau tau
-def cs_tautau_w_condition_Hamzeh(wvalue):
-    mtau = 1.77686
-    alpha2 = (1.0 / 137.0)**2
+# Elastic Form Factors (Dipole Approximation)
+def G_E(Q2):
+    return (1 + Q2 / 0.71) ** (-4)
 
-    beta = np.sqrt(np.where(1.0 - 4.0 * mtau**2 / wvalue**2 >= 0.0, 1.0 - 4.0 * mtau**2 / wvalue**2, np.nan))
-    cs = np.where(wvalue > 2 * mtau, (4.0 * np.pi * alpha2 * hbarc2 / wvalue**2) * beta *
-                  ((3.0 - beta**4) / (2.0 * beta) * np.log((1.0 + beta) / (1.0 - beta)) - 2.0 + beta**2), 0.0)
-    return cs
+def G_M(Q2):
+    return 7.78 * G_E(Q2)
 
-# Photon Fluxes
+# Minimum Photon Virtuality
+def qmin2(mass, y):
+    return mass * mass * y * y / (1 - y) if y < 1 else float('inf')
 
-def flux_y_pl(ye, q2max):
+# Photon Flux from Electron
+def flux_y_electron(ye, lnQ2e):
+    Q2e = np.exp(lnQ2e)
     if ye <= 0 or ye >= 1:
         return 0.0
-    flux = ALPHA2PI / ye * (1 - ye + 0.5 * ye**2)
-    return flux
+    qmin2v = qmin2(emass, ye)
+    if qmin2v <= 0 or Q2e < qmin2v or Q2e > q2emax:
+        return 0.0
+    flux = ALPHA2PI / (ye * Q2e) * ((1 - ye) * (1 - qmin2v / Q2e) + 0.5 * ye**2)
+    return flux * Q2e  # Multiply by Q2e to account for dQ^2 = Q^2 d(lnQ^2)
 
-def flux_y_dipole(yp, pmass, qmax2):
+# Photon Flux from Proton
+def flux_y_proton(yp):
     if yp <= 0 or yp >= 1:
         return 0.0
-    flux = ALPHA2PI / yp * (1 - yp)
-    return flux
-
-# Photon-Photon Flux Product
-def flux_yy_atye(w, Y, qmax2e, qmax2p, eEbeam, pEbeam):
-    yp = w * np.exp(Y) / (2.0 * pEbeam)
-    ye = w * np.exp(-Y) / (2.0 * eEbeam)
-
-    if yp <= 0.0 or yp >= 1.0 or ye <= 0.0 or ye >= 1.0:
+    qmin2p = qmin2(pmass, yp)
+    if qmin2p <= 0:
         return 0.0
 
-    flux_prod = cs_tautau_w_condition_Hamzeh(w) * flux_y_dipole(yp, pmass, qmax2p) * w * flux_y_pl(ye, emass, qmax2e)
-    return flux_prod
+    def lnQ2p_integrand(lnQ2p):
+        Q2p = np.exp(lnQ2p)
+        if Q2p < qmin2p or Q2p > q2pmax:
+            return 0.0
+        gE2 = G_E(Q2p)
+        gM2 = G_M(Q2p)
+        formE = (4 * pmass**2 * gE2 + Q2p * gM2) / (4 * pmass**2 + Q2p)
+        formM = gM2
+        flux = ALPHA2PI / (yp * Q2p) * ((1 - yp) * (1 - qmin2p / Q2p) * formE + 0.5 * yp**2 * formM)
+        return flux * Q2p  # Multiply by Q2p to account for dQ^2 = Q^2 d(lnQ^2)
 
-# Differential Cross-Section dSigma/dY
-def differential_cross_section_dY(Y, eEbeam, pEbeam, W_min, W_max):
-    def vegas_integrand(x):
-        W = W_min + x[0] * (W_max - W_min)
-        flux = flux_yy_atye(W, Y, q2emax, q2pmax, eEbeam, pEbeam)
-        return flux * (W_max - W_min)
+    result_lnQ2p, _ = integrate.quad(lnQ2p_integrand, math.log(qmin2p), math.log(q2pmax), epsrel=1e-4)
+    return result_lnQ2p
 
-    integrator = vegas.Integrator([[0, 1]])
-    result = integrator(vegas_integrand, nitn=10, neval=10000)
-    return result.mean if result.Q > 0.1 else 0.0
+# Tau-Tau Production Cross-Section Calculation at Given W
+def cs_tautau_w_condition(W):
+    alpha = 1 / 137.0
+    hbarc2 = 0.389  # Conversion factor to pb
+    mtau = 1.77686  # Tau mass in GeV
+    if W < 2 * mtau:
+        return 0.0
+    beta = math.sqrt(1.0 - 4.0 * mtau**2 / W**2)
+    cross_section = (4 * math.pi * alpha**2 * hbarc2) / W**2 * beta * (
+        (3 - beta**4) / (2 * beta) * math.log((1 + beta) / (1 - beta)) - 2 + beta**2
+    ) * 1e9
+    return cross_section
 
-# Main Calculation
-if __name__ == "__main__":
-    eEbeam = 20.0  # Electron beam energy in GeV
-    pEbeam = 7000.0  # Proton beam energy in GeV
+# Calculate dSigma/dY for a given Y
+def dSigma_dY(Y):
+    def integrand(W):
+        yp = W * math.exp(Y) / (2 * pEbeam)
+        ye = W * math.exp(-Y) / (2 * eEbeam)
+        if yp <= 0 or yp >= 1 or ye <= 0 or ye >= 1:
+            return 0.0
+        lnQ2e_min = math.log(qmin2(emass, ye))
+        lnQ2e_max = math.log(q2emax)
+        def electron_flux_integrand(lnQ2e):
+            return flux_y_electron(ye, lnQ2e)
+        flux_ye, _ = integrate.quad(electron_flux_integrand, lnQ2e_min, lnQ2e_max, epsrel=1e-4)
+        return flux_ye * flux_y_proton(yp) * cs_tautau_w_condition(W) * W
+
     s_cms = 4.0 * eEbeam * pEbeam
-    W_min = 10.0
-    W_max = np.sqrt(s_cms)
+    W_min = W0
+    W_max = math.sqrt(s_cms)
+    integral_result, _ = integrate.quad(integrand, W_min, W_max, epsrel=1e-4)
+    return (2.0 / s_cms) * integral_result
 
-    # Rapidities
-    Y_values = np.linspace(-2.5, 2.5, 100)
-    dSigma_dY = []
+# Compute dSigma/dY for a range of Y values
+Y_values = np.linspace(-10, 10, 303)
+dSigma_values = [dSigma_dY(Y) for Y in Y_values]
 
-    for Y in Y_values:
-        dSigma_dY.append(differential_cross_section_dY(Y, eEbeam, pEbeam, W_min, W_max))
+# Save results to a file
+output_data = np.column_stack((Y_values, dSigma_values))
+header = "Y dSigma/dY [pb]"
+np.savetxt("dSigma_dY_tau_tau.txt", output_data, header=header, fmt="%0.8e")
 
-    # Save results
-    np.savetxt("dSigma_dY_tau_tau.txt", np.column_stack((Y_values, dSigma_dY)), header="Y dSigma/dY [pb]")
-
-    # Plotting
-    plt.figure(figsize=(10, 8))
-    plt.plot(Y_values, dSigma_dY, label=r"$\frac{d\sigma}{dY}$ for $\tau^+\tau^-", linewidth=2)
-    plt.xlabel(r"$Y$", fontsize=16)
-    plt.ylabel(r"$\frac{d\sigma}{dY}$ [pb]", fontsize=16)
-    plt.title("Differential Cross-Section for $\tau^+\tau^-$", fontsize=18)
-    plt.grid(True)
-    plt.legend(fontsize=14)
-    plt.savefig("dSigma_dY_tau_tau.pdf")
-    plt.show()
+# Plot the results
+plt.figure(figsize=(8, 6))
+plt.plot(Y_values, dSigma_values, label=r"$d\sigma/dY$")
+plt.xlabel(r"$Y$")
+plt.ylabel(r"$d\sigma/dY$ [pb]")
+plt.title(r"Differential Cross-Section $d\sigma/dY$ for $\tau^+\tau^-$ Production")
+plt.legend()
+plt.grid()
+plt.savefig("dSigma_dY_tau_tau.pdf")
+plt.show()
