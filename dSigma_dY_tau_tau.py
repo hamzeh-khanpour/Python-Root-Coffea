@@ -1,3 +1,7 @@
+
+#----------------------------------------------------------------
+#----------------------------------------------------------------
+
 import numpy as np
 import math
 import scipy.integrate as integrate
@@ -7,11 +11,13 @@ import matplotlib.pyplot as plt
 ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4  # Electron mass in GeV
 pmass = 0.938272081   # Proton mass in GeV
-q2emax = 10.0         # Maximum photon virtuality for electron in GeV^2
-q2pmax = 10.0         # Maximum photon virtuality for proton in GeV^2
-mNmax = 3.0           # Maximum mass of nuclear system in GeV
+
+q2emax = 100.0         # Maximum photon virtuality for electron in GeV^2
+q2pmax = 100.0         # Maximum photon virtuality for proton in GeV^2
+
 W0 = 10.0             # Minimum W value in GeV
-eEbeam = 20.0         # Electron beam energy in GeV
+
+eEbeam = 50.0         # Electron beam energy in GeV
 pEbeam = 7000.0       # Proton beam energy in GeV
 
 # Elastic Form Factors (Dipole Approximation)
@@ -25,6 +31,9 @@ def G_M(Q2):
 def qmin2(mass, y):
     return mass * mass * y * y / (1 - y) if y < 1 else float('inf')
 
+
+#----------------------------------------------------------------
+
 # Photon Flux from Electron
 def flux_y_electron(ye, lnQ2e):
     Q2e = np.exp(lnQ2e)
@@ -35,6 +44,8 @@ def flux_y_electron(ye, lnQ2e):
         return 0.0
     flux = ALPHA2PI / (ye * Q2e) * ((1 - ye) * (1 - qmin2v / Q2e) + 0.5 * ye**2)
     return flux * Q2e  # Multiply by Q2e to account for dQ^2 = Q^2 d(lnQ^2)
+
+#----------------------------------------------------------------
 
 # Photon Flux from Proton
 def flux_y_proton(yp):
@@ -58,6 +69,8 @@ def flux_y_proton(yp):
     result_lnQ2p, _ = integrate.quad(lnQ2p_integrand, math.log(qmin2p), math.log(q2pmax), epsrel=1e-4)
     return result_lnQ2p
 
+#----------------------------------------------------------------
+
 # Tau-Tau Production Cross-Section Calculation at Given W
 def cs_tautau_w_condition(W):
     alpha = 1 / 137.0
@@ -71,34 +84,58 @@ def cs_tautau_w_condition(W):
     ) * 1e9
     return cross_section
 
+
+#----------------------------------------------------------------
+
 # Calculate dSigma/dY for a given Y
 def dSigma_dY(Y):
     def integrand(W):
         yp = W * math.exp(Y) / (2 * pEbeam)
         ye = W * math.exp(-Y) / (2 * eEbeam)
+
         if yp <= 0 or yp >= 1 or ye <= 0 or ye >= 1:
             return 0.0
+        
         lnQ2e_min = math.log(qmin2(emass, ye))
         lnQ2e_max = math.log(q2emax)
+
         def electron_flux_integrand(lnQ2e):
             return flux_y_electron(ye, lnQ2e)
+        
         flux_ye, _ = integrate.quad(electron_flux_integrand, lnQ2e_min, lnQ2e_max, epsrel=1e-4)
-        return flux_ye * flux_y_proton(yp) * cs_tautau_w_condition(W) * W
+
+        return flux_ye * flux_y_proton(yp) * cs_tautau_w_condition(W) * W 
+
 
     s_cms = 4.0 * eEbeam * pEbeam
     W_min = W0
     W_max = math.sqrt(s_cms)
     integral_result, _ = integrate.quad(integrand, W_min, W_max, epsrel=1e-4)
+
     return (2.0 / s_cms) * integral_result
+
+
+#----------------------------------------------------------------
 
 # Compute dSigma/dY for a range of Y values
 Y_values = np.linspace(-10, 10, 303)
 dSigma_values = [dSigma_dY(Y) for Y in Y_values]
 
+
+#----------------------------------------------------------------
+
 # Save results to a file
 output_data = np.column_stack((Y_values, dSigma_values))
-header = "Y dSigma/dY [pb]"
+
+header = (
+    "Rapidity (Y)   dSigma/dY [pb]\n"
+    f"eEbeam: {eEbeam} GeV, pEbeam: {pEbeam} GeV\n"
+    f"q2emax: {q2emax}, q2pmax: {q2pmax}"
+)
 np.savetxt("dSigma_dY_tau_tau.txt", output_data, header=header, fmt="%0.8e")
+
+
+#----------------------------------------------------------------
 
 # Plot the results
 plt.figure(figsize=(8, 6))
@@ -110,3 +147,8 @@ plt.legend()
 plt.grid()
 plt.savefig("dSigma_dY_tau_tau.pdf")
 plt.show()
+
+
+#----------------------------------------------------------------
+#----------------------------------------------------------------
+
