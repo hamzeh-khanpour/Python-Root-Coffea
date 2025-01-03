@@ -334,10 +334,10 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 
 
 # Parameters
-eEbeam = 50.0  # Electron beam energy in GeV
+eEbeam = 20.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
-W_values = np.logspace(1.0, 3.0, 303)  # Range of W values from 10 GeV to 1000 GeV
-#W_values = np.logspace(1.0, 2.874, 404)  # Range of W values from 10 GeV to 1000 GeV  LHeC@750GeV
+#W_values = np.logspace(1.0, 3.0, 303)  # Range of W values from 10 GeV to 1000 GeV
+W_values = np.logspace(1.0, 2.874, 404)  # Range of W values from 10 GeV to 1000 GeV  LHeC@750GeV
 
 
 num_cores = 10  # Set this to the number of cores you want to use
@@ -356,7 +356,7 @@ if __name__ == "__main__":
 
 
 # Save results with None handling and formatted filename
-    filename = f"Inelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas.txt"
+    filename = f"Inelastic_Photon_Luminosity_Spectrum_MNmax_{int(MN_max)}_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas_LHeC750GeV.txt"
 
     with open(filename, "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
