@@ -98,26 +98,32 @@ fig, ax = plt.subplots(figsize=(10.0, 11.0))
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.12, top=0.95)
 
 ax.set_xlim(10.0, 1000.0)
-ax.set_ylim(1.e-7, 1.e0)
+ax.set_ylim(1.e-7, 0.3)
 
 
 
 # Plot the luminosity spectra
-ax.loglog(wv_elastic_I, s_yy_elastic_I, label="elastic (LHeC@1.2TeV)", linestyle="solid", linewidth=3, color="blue")
+ax.loglog(wv_elastic_I, s_yy_elastic_I, label="elastic", linestyle="solid", linewidth=3, color="blue")
 
-ax.loglog(wv_elastic_II, s_yy_elastic_II, label="elastic - p detected (LHeC@1.2TeV)", linestyle="dashdot", linewidth=3, color="orange")
+ax.loglog(wv_elastic_II, s_yy_elastic_II, label="elastic - p detected", linestyle="dashdot", linewidth=3, color="orange")
 #ax.loglog(wv_elastic_III, s_yy_elastic_III, label="elastic - p detected (LHeC@0.75TeV)", linestyle="dotted", linewidth=3, color="black")
 
-ax.loglog(wv_inelastic_I, s_yy_inelastic_I, label=r"$M_N < 10$ GeV ($Q^2_p < 10$ GeV$^2$) (LHeC@1.2TeV)", linestyle=(0, (5, 2, 1, 2, 1, 2)), linewidth=3, color="red")
-ax.loglog(wv_inelastic_II, s_yy_inelastic_II, label=r"$M_N < 100$ GeV ($Q^2_p < 10^5$ GeV$^2$) (LHeC@0.75TeV)", linestyle="dotted", linewidth=3, color="magenta")
-ax.loglog(wv_inelastic_III, s_yy_inelastic_III, label=r"$M_N < 100$ GeV ($Q^2_p < 10^5$ GeV$^2$) (LHeC@1.2TeV)", linestyle="dashed", linewidth=3, color="green")
+ax.loglog(wv_inelastic_I, s_yy_inelastic_I, label=r"$M_N < 10$ GeV ($Q^2_p < 10$ GeV$^2$)", linestyle=(0, (5, 2, 1, 2, 1, 2)), linewidth=3, color="red")
+ax.loglog(wv_inelastic_II, s_yy_inelastic_II, label=r"$M_N < 100$ GeV ($Q^2_p < 10^5$ GeV$^2$) ($\sqrt{s}=0.75$ TeV)", linestyle="dotted", linewidth=3, color="magenta")
+ax.loglog(wv_inelastic_III, s_yy_inelastic_III, label=r"$M_N < 100$ GeV ($Q^2_p < 10^5$ GeV$^2$)", linestyle="dashed", linewidth=3, color="green")
 
 
 
 # Add labels and legend
 ax.set_xlabel(r"$W$ [GeV]")
 ax.set_ylabel(r"$S_{\gamma\gamma}$ [GeV$^{-1}$]")
-ax.legend(title=r"$Q^2_e < 10^5$ GeV$^2$", loc="upper right")
+ax.legend(
+    title=r"$Q^2_e < 10^5$ GeV$^2$", 
+    loc="upper right"#, 
+#    fontsize="small",  # Adjusts the font size of the legend labels
+#    title_fontsize="small"  # Adjusts the font size of the legend title
+)
+
 
 
 
