@@ -38,7 +38,7 @@ plt.rcParams['legend.title_fontsize'] = 'x-large' '''
 
 # Load data from input files
 inelastic_data_I = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_10_q2emax_100000_q2pmax_10_using_vegas.txt", skiprows=1)
-inelastic_data_II = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_100_q2emax_100000_q2pmax_100000_using_vegas_LHeC750GeV.txt", skiprows=1)
+inelastic_data_II = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_100_q2emax_100000_q2pmax_100000_using_vegas_LHeC750GeV_303.txt", skiprows=1)
 inelastic_data_III = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_100_q2emax_100000_q2pmax_100000_using_vegas.txt", skiprows=1)
 
 elastic_data_I = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_10_using_vegas.txt", skiprows=1)
@@ -98,7 +98,7 @@ fig, ax = plt.subplots(figsize=(10.0, 11.0))
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.12, top=0.95)
 
 ax.set_xlim(10.0, 1000.0)
-ax.set_ylim(1.e-7, 0.3)
+ax.set_ylim(1.e-7, 0.2)
 
 
 
