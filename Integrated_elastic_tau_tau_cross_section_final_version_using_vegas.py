@@ -20,7 +20,7 @@ ALPHA2PI = 7.2973525693e-3 / math.pi  # Fine structure constant divided by pi
 emass = 5.1099895e-4  # Electron mass in GeV
 pmass = 0.938272081   # Proton mass in GeV
 
-q2emax = 100000.0         # Maximum photon virtuality for electron in GeV^2
+q2emax = 10.0         # Maximum photon virtuality for electron in GeV^2
 q2pmax = 10.0         # Maximum photon virtuality for proton in GeV^2
 
 # Elastic Form Factors (Dipole Approximation)
@@ -196,9 +196,10 @@ def integrated_tau_tau_cross_section(W0, eEbeam, pEbeam):
 ################################################################################
 
 # Parameters
-eEbeam = 20.0  # Electron beam energy in GeV
+eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
-W_values = np.logspace(1.0, 2.874, 404)  # Range of W values from 10 GeV to 1000 GeV
+W_values = np.logspace(1.0, 3.0, 303)  # Range of W values from 10 GeV to 1000 GeV
+#W_values = np.logspace(1.0, 2.874, 404)  # Range of W values from 10 GeV to 1000 GeV  _LHeC750GeV
 
 num_cores = 10  # Set this to the number of cores you want to use
 
@@ -214,7 +215,7 @@ if __name__ == "__main__":
         luminosity_values = pool.starmap(flux_el_yy_atW, [(W, eEbeam, pEbeam) for W in W_values])
 
     # Save results to a text file with q2emax and q2pmax included in the filename
-    filename_txt = f"Elastic_Photon_Luminosity_Spectrum_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas_LHeC750GeV.txt"
+    filename_txt = f"Elastic_Photon_Luminosity_Spectrum_q2emax_{int(q2emax)}_q2pmax_{int(q2pmax)}_using_vegas.txt"
     with open(filename_txt, "w") as file:
         file.write("# W [GeV]    S_yy [GeV^-1]\n")
         for W, S_yy in zip(W_values, luminosity_values):

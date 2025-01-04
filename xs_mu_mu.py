@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 
 
 # Load photon luminosity data from the text file
-data = np.loadtxt('Elastic_Photon_Luminosity_Spectrum_q2emax_10_q2pmax_10_using_vegas.txt', comments='#')
+data = np.loadtxt('Inelastic_Photon_Luminosity_Spectrum_MNmax_3_q2emax_10_q2pmax_10_using_vegas.txt', comments='#')
 
 W_data = data[:, 0]
 S_yy_data = data[:, 1]
@@ -76,7 +76,7 @@ def integrated_mu_mu_cross_section(W0, eEbeam, pEbeam):
 # Parameters
 eEbeam = 50.0  # Electron beam energy in GeV
 pEbeam = 7000.0  # Proton beam energy in GeV
-W0_value = 10.0  # GeV
+W0_value = 100.0  # GeV
 
 # Calculate Integrated mu-mu Production Cross-Section at W_0 = 10 GeV
 integrated_cross_section_value = integrated_mu_mu_cross_section(W0_value, eEbeam, pEbeam)
@@ -84,5 +84,4 @@ print(f"Integrated inelastic mu-mu Production Cross-Section at W_0 = {W0_value} 
 
     
 ################################################################################
-
 
