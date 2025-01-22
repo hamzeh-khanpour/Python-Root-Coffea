@@ -41,9 +41,9 @@ inelastic_data_II = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_100_q
 inelastic_data_III = np.loadtxt("Inelastic_Photon_Luminosity_Spectrum_MNmax_300_q2emax_100000_q2pmax_100000_using_vegas.txt", skiprows=1)
 
 
-elastic_data_I = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_10_using_vegas.txt", skiprows=1)
-elastic_data_II = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_10_using_vegas_tagged_elastic_Newyp.txt", skiprows=1)
-elastic_data_III = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_10_using_vegas_tagged_elastic_LHeC750GeV_Newyp.txt", skiprows=1)
+elastic_data_I = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_100000_using_vegas.txt", skiprows=1)
+elastic_data_II = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_100000_using_vegas_tagged_elastic_Newyp.txt", skiprows=1)
+elastic_data_III = np.loadtxt("Elastic_Photon_Luminosity_Spectrum_q2emax_100000_q2pmax_100000_using_vegas_tagged_elastic_LHeC750GeV_Newyp.txt", skiprows=1)
 
 
 # Extract W values and luminosity spectra
